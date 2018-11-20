@@ -1,0 +1,31 @@
+{% extends 'base/base.html' %}
+{% block content %}
+
+
+{% if view.user_type == 'venue_coordinator'%}
+
+{% include 'partials/venue_coordinator_signup_form.html' %}
+
+{% endif %}
+
+{% if view.user_type == 'event_coordinator'%}
+
+{% include 'partials/event_coordinator_signup_form.html' %}
+
+{% endif %}
+
+{% if view.user_type == None %}
+<div id="pv-sign-up">
+    <h1>Sign up for a free account</h1>
+    <h3>Are you and Event Coordinator or a Venue Coordinator?</h3>
+    <div>
+        <a id="event-coord-signup-btn" href="/accounts/signup/event_coordinator/">I'm an Event Coordinator</a>
+        <a id="venue-coord-signup-btn" href="/accounts/signup/venue_coordinator/">I'm an Venue Coordinator</a>
+    </div>
+</div>
+
+{% endif %}
+
+{% endblock %}
+
+

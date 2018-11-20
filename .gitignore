@@ -18,6 +18,7 @@ perfectvenue/perfectvenue/settings.py
 /perfectvenue/settings.py
 perfectvenue/settings.py
 settings.py
+db.sqlite3
 
 # OS generated files #
 ######################

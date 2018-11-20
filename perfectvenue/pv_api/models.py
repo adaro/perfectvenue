@@ -2,22 +2,30 @@
 from __future__ import unicode_literals
 
 from django.db import models
-
-from django.db import models
 from django.conf import settings
+from django.contrib.auth.models import AbstractUser
+
+
+class User(AbstractUser):
+    is_event_coordinator = models.BooleanField('event coordinator status', default=False)
+    is_venue_coordinator = models.BooleanField('venue coordinator status', default=False)
+
+
+# class Coordinator(models.Model):
+#     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
 
 
 class Venue(models.Model):
     name = models.CharField(max_length=200)
     address = models.TextField()
     description = models.TextField()
-    hours_of_operation = models.CharField(default="9:00 AM to 5:00 PM", max_length=200)
-    days_available = models.CharField(default="Monday through Friday", max_length=200)
+    # hours_of_operation = models.CharField(default="9:00 AM to 5:00 PM", max_length=200)
+    # days_available = models.CharField(default="Monday through Friday", max_length=200)
     occupancy = models.IntegerField()
     parking_notes = models.TextField()
     logo = models.URLField()
 
-    def search_event(self, query_string):
+    def search_venue(self, query_string):
         return self.objects.filter(name=query_string)
 
 
@@ -26,7 +34,7 @@ class Space(models.Model):
         ('BK', 'BOOKED'),
         ('OP', 'OPEN')
     )
-    venue = models.ForeignKey(Venue)
+    venue = models.ForeignKey(Venue, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
     status = models.CharField(choices=STATUSES, max_length=200)
 
@@ -45,8 +53,7 @@ class Event(models.Model):
         ('CN', 'CANCELED'),
     )
     name = models.CharField(max_length=200)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL)
-    venue = models.ForeignKey(Venue, )
+    venue = models.ForeignKey(Venue, on_delete=models.CASCADE)
     spaces = models.ManyToManyField(Space)
     date = models.DateTimeField()
     notes = models.TextField()

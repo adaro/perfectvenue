@@ -1,0 +1,9 @@
+{% block messages %}
+    {% if message %}<div class='imp_message'>{{ message }}</div>{% endif %}
+{% endblock %}
+<form action="/accounts/signup/venue_coordinator/" method="post">
+    {% csrf_token %}
+    {{ form }}
+    <br/>
+    <input type="submit" value="Create Account">
+</form>
