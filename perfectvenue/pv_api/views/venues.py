@@ -24,8 +24,13 @@ class CoordinatorSignUpView(CreateView):
 
 @method_decorator(login_required, name='dispatch')
 class VenueView(View):
-    def get(self, request):
-        print 'Got Venues'
+    def get(self, request, venue_id=None):
+        if request.GET.get('name'):
+            venues = serializers.serialize("json", Venue.objects.filter(name__icontains=request.GET.get('name')))
+            return HttpResponse(venues, content_type="application/json")
+        if venue_id:
+            venue = serializers.serialize("json", Venue.objects.filter(id=venue_id))
+            return HttpResponse(venue, content_type="application/json")
         venues = serializers.serialize("json", Venue.objects.all())
         return HttpResponse(venues, content_type="application/json")
 

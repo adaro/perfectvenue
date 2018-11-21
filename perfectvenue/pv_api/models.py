@@ -21,24 +21,28 @@ class Venue(models.Model):
     def search_venue(self, query_string):
         return self.objects.filter(name=query_string)
 
+    def __str__(self):
+        return self.name
+
 
 class Space(models.Model):
-    STATUSES = (
-        ('BK', 'BOOKED'),
-        ('OP', 'OPEN')
-    )
+    # STATUSES = (
+    #     ('BK', 'BOOKED'),
+    #     ('OP', 'OPEN')
+    # )
     venue = models.ForeignKey(Venue, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
-    status = models.CharField(choices=STATUSES, max_length=200)
+    # status = models.CharField(choices=STATUSES, max_length=200)
 
+    # def is_open(self):
+    #     return self.status == 'OP'
 
-    # TODO: will need to have a way to set 'required' if certain date is set
+    # TODO: this method should be checking to see if there is an event with this space for a given date
+    # def is_booked(self):
+    #     return self.status == 'BK'
 
-    def is_open(self):
-        return self.status == 'OP'
-
-    def is_booked(self):
-        return self.status == 'BK'
+    def __str__(self):
+        return "{} - {}".format(self.venue.name, self.name)
 
 
 class Event(models.Model):
@@ -51,7 +55,8 @@ class Event(models.Model):
     name = models.CharField(max_length=200)
     venue = models.ForeignKey(Venue, on_delete=models.CASCADE)
     spaces = models.ManyToManyField(Space)
-    date = models.DateTimeField()
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
     notes = models.TextField()
     status = models.CharField(choices=STATUSES, max_length=200)
 
@@ -81,3 +86,6 @@ class Event(models.Model):
 
     def is_cancelled(self):
         return self.status == 'CN'
+
+    def __str__(self):
+        return self.name

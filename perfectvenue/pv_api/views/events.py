@@ -6,7 +6,6 @@ from django.utils.decorators import method_decorator
 from django.core import serializers
 from perfectvenue.forms import EventCoordinatorSignUpForm
 from ..models import User, Event
-import json
 
 
 class CoordinatorSignUpView(CreateView):
@@ -26,8 +25,14 @@ class CoordinatorSignUpView(CreateView):
 
 @method_decorator(login_required, name='dispatch')
 class EventView(View):
-    def get(self, request):
-        print 'Got Events'
+    def get(self, request, event_id=None):
+
+        if request.GET.get('name'):
+            events = serializers.serialize("json", Event.objects.filter(name__icontains=request.GET.get('name')))
+            return HttpResponse(events, content_type="application/json")
+        if event_id:
+            event = serializers.serialize("json", Event.objects.filter(id=event_id))
+            return HttpResponse(event, content_type="application/json")
         events = serializers.serialize("json", Event.objects.all())
         return HttpResponse(events, content_type="application/json")
 
