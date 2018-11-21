@@ -1,7 +1,7 @@
-from django.conf.urls import url, include
-from django.contrib import admin
-from pv_api.views import events
+from django.conf.urls import url
+from pv_api.views import events, venues
 
 urlpatterns = [
-    url('^', events.HomeView.as_view(), name='home'),
+    url('events/', events.EventView.as_view(), name='events'),
+    url('venues/', venues.VenueView.as_view(), name='venues'),
 ]

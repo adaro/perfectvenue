@@ -2,7 +2,6 @@ from django.contrib.auth import login
 from django.shortcuts import redirect, render
 from django.views.generic import View
 
-from ..models import User
 
 class SignUpView(View):
     

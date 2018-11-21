@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 
 from django.db import models
-from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 
 
@@ -11,16 +10,10 @@ class User(AbstractUser):
     is_venue_coordinator = models.BooleanField('venue coordinator status', default=False)
 
 
-# class Coordinator(models.Model):
-#     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-
-
 class Venue(models.Model):
     name = models.CharField(max_length=200)
     address = models.TextField()
     description = models.TextField()
-    # hours_of_operation = models.CharField(default="9:00 AM to 5:00 PM", max_length=200)
-    # days_available = models.CharField(default="Monday through Friday", max_length=200)
     occupancy = models.IntegerField()
     parking_notes = models.TextField()
     logo = models.URLField()
@@ -37,6 +30,9 @@ class Space(models.Model):
     venue = models.ForeignKey(Venue, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
     status = models.CharField(choices=STATUSES, max_length=200)
+
+
+    # TODO: will need to have a way to set 'required' if certain date is set
 
     def is_open(self):
         return self.status == 'OP'
@@ -62,6 +58,9 @@ class Event(models.Model):
     def book(self, venue_id, space_ids, date, notes):
         venue = Venue.objects.get(id=venue_id)
         booking = self.objects.create(venue=venue, date=date, notes=notes, status='PN')
+
+        # TODO: function that checks to see if a particular Space ID requires sibling spaces to also be booked
+        # TODO: based on time of year, [ ], [ ]
         for spid in space_ids:
             space = Space.objects.get(id=spid)
             booking.spaces.add(space)

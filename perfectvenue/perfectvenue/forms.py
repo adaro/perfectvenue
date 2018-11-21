@@ -15,7 +15,6 @@ class VenueCoordinatorSignUpForm(UserCreationForm):
         user.is_venue_coordinator = True
         user.save()
         print 'Creating Venue Coord'
-        #TODO: not attaching anything to the Coordinator model right now, but leaving in here.
         return user
 
 class EventCoordinatorSignUpForm(UserCreationForm):
@@ -29,7 +28,6 @@ class EventCoordinatorSignUpForm(UserCreationForm):
         user.is_event_coordinator = True
         user.save()
         print 'Creating Event Coord'
-        #TODO: not attaching anything to the Coordinator model right now, but leaving in here.
         return user
 
 

@@ -19,10 +19,9 @@ from pv_api.views import events, venues, pv_api
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url(r'api/', include('pv_api.urls', namespace='api')),
     url('accounts/', include('django.contrib.auth.urls')),
     url('accounts/select/', pv_api.SignUpView.as_view(), name='signup'),
     url('accounts/signup/venue_coordinator/', venues.CoordinatorSignUpView.as_view(), name='venue_coordinator_signup'),
     url('accounts/signup/event_coordinator/', events.CoordinatorSignUpView.as_view(), name='event_coordinator_signup'),
-
-    url(r'events/', include('pv_api.urls', namespace='events')),
 ]
