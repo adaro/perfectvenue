@@ -6,14 +6,14 @@ from django.core import serializers
 from ..models import Space, Venue
 import json
 
+
 @method_decorator(login_required, name='dispatch')
 class SpaceView(View):
     def get(self, request, space_id=None):
         if request.GET.get('venue'):
             venue_object = Venue.objects.get(id=request.GET.get('venue'))  # TODO: handle does not exists here
-
             if request.GET.get('start_date') and request.GET.get('end_date'):
-                spaces = Space.is_booked(venue_object, request.GET.get('start_date'), request.GET.get('end_date'))
+                spaces = Space.get_spaces(venue_object, request.GET.get('start_date'), request.GET.get('end_date'))
                 return HttpResponse(json.dumps(spaces), content_type="application/json")
                 # TODO: return spaces that are available for this date.
 

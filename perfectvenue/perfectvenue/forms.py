@@ -32,3 +32,5 @@ class EventCoordinatorSignUpForm(UserCreationForm):
 
 
 
+
+

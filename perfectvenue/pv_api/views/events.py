@@ -1,10 +1,11 @@
 from django.contrib.auth import login
-from django.shortcuts import redirect, HttpResponse
+from django.shortcuts import redirect, HttpResponse, render
 from django.views.generic import CreateView, View
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.core import serializers
 from perfectvenue.forms import EventCoordinatorSignUpForm
+from ..forms import EventForm
 from ..models import User, Event
 
 
@@ -27,14 +28,31 @@ class CoordinatorSignUpView(CreateView):
 class EventView(View):
     def get(self, request, event_id=None):
 
+        form = EventForm()
+
         if request.GET.get('name'):
             events = serializers.serialize("json", Event.objects.filter(name__icontains=request.GET.get('name')))
             return HttpResponse(events, content_type="application/json")
         if event_id:
             event = serializers.serialize("json", Event.objects.filter(id=event_id))
             return HttpResponse(event, content_type="application/json")
-        events = serializers.serialize("json", Event.objects.all())
-        return HttpResponse(events, content_type="application/json")
+
+        # events = serializers.serialize("json", Event.objects.all())
+        # return HttpResponse(events, content_type="application/json")
+        return render(request, 'events/event.html', {"form": form})
+
 
     def post(self, request):
-        pass
+        print 'posting to event'
+        event_form = EventForm(request.POST)
+        new_event = serializers.serialize("json", [event_form.save()])
+        return HttpResponse(new_event, content_type="application/json")
+
+    def put(self, request, event_id):
+        event = Event.objects.get(id=event_id)
+        event_form = EventForm(request.POST, instance=event)
+        updated_event = serializers.serialize("json", [event_form.save()])
+        return HttpResponse(updated_event, content_type="application/json")
+
+
+

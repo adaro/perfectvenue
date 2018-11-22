@@ -6,6 +6,7 @@ from django.contrib.auth.models import AbstractUser
 from django.core import serializers
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.shortcuts import get_object_or_404
 
 from notifications.signals import notify
 
@@ -19,9 +20,9 @@ class Venue(models.Model):
     name = models.CharField(max_length=200)
     address = models.TextField()
     description = models.TextField()
-    occupancy = models.IntegerField(null=True)
-    parking_notes = models.TextField(null=True)
-    logo = models.URLField(null=True)
+    occupancy = models.IntegerField(blank=True, null=True)
+    parking_notes = models.TextField(blank=True, null=True)
+    logo = models.URLField(blank=True, null=True)
     coordinators = models.ManyToManyField(User)
 
     def search_venue(self, query_string):
@@ -38,19 +39,20 @@ class Space(models.Model):
 
     # TODO: this method should be checking to see if there is an event with this space for a given date
     # TODO: query event by start and end date
-    # TODO: if queried event has space, return as "unavailable" else return as "available"
+    # TODO: if queried event has space, return as "booked" else return as "available"
 
     @classmethod
-    def is_booked(cls, venue_object, start_date, end_date):
+    def get_spaces(cls, venue_object, start_date, end_date):
         events = Event.objects.filter(venue=venue_object, start_date__gte=start_date, end_date__lte=end_date)
-        spaces = {'booked': [], 'available': []}
+        spaces = []
         if events.exists():
             for event in events:
-                for space in event.spaces.all():
-                    spaces['booked'].append(serializers.serialize("json", [space]))
+                space = {'event': event.id, 'booked': list(event.spaces.all().values()), 'available': []}
+                spaces.append(space)
         else:
-            event = Event.objects.get(venue=venue_object)
-            spaces['available'].append(serializers.serialize("json", event.spaces.all()))
+            event = Event.objects.filter(venue=venue_object).first()
+            space = {'event': None, 'booked': [], 'available': list(event.spaces.all().values())}
+            spaces.append(space)
 
         print 'GOT OUR SPACES.....', spaces
         return spaces
@@ -71,7 +73,7 @@ class Event(models.Model):
     spaces = models.ManyToManyField(Space)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
-    notes = models.TextField(null=True)
+    notes = models.TextField(blank=True, null=True)
     status = models.CharField(choices=STATUSES, max_length=200)
     coordinators = models.ManyToManyField(User)
 

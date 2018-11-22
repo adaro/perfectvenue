@@ -1,16 +1,21 @@
 from django.shortcuts import HttpResponse
 from django.views.generic import View
+from django.core import serializers
+
 from ..models import User
+
 
 class UnreadNotificationView(View):
     def get(self, request, user_id=None):
         if user_id:
             user = User.objects.get(id=user_id)
             print user.notifications.unread()
-            return HttpResponse("", content_type="application/json")
+            notifications = serializers.serialize("json", user.notifications.unread())
+            return HttpResponse(notifications, content_type="application/json")
 
         print request.user.notifications.unread()
-        return HttpResponse("", content_type="application/json")
+        notifications = serializers.serialize("json", request.user.notifications.unread())
+        return HttpResponse(notifications, content_type="application/json")
 
     def post(self, request):
         # TODO: using index here but we probably want a better way to query the notification object
@@ -24,11 +29,13 @@ class ReadNotificationView(View):
     def get(self, request, user_id=None):
         if user_id:
             user = User.objects.get(id=user_id)
-            print user.notifications.read()
-            return HttpResponse("", content_type="application/json")
+            user.notifications.read()
+            notifications = serializers.serialize("json", user.notifications.read())
+            return HttpResponse(notifications, content_type="application/json")
 
         print request.user.notifications.read()
-        return HttpResponse("", content_type="application/json")
+        notifications = serializers.serialize("json", request.user.notifications.read())
+        return HttpResponse(notifications, content_type="application/json")
 
     def post(self, request):
         index = request.body.get('index')

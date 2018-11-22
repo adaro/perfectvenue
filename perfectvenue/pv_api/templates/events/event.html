@@ -1,0 +1,33 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+
+{% block messages %}
+    {% if message %}<div class='imp_message'>{{ message }}</div>{% endif %}
+{% endblock %}
+<style>
+    form {
+        display: flex;
+        flex-direction: column;
+        width: 20%;
+        margin: 0 auto;
+    }
+</style>
+
+
+<form action="/api/events/" method="post">
+    {% csrf_token %}
+    {{ form }}
+    <br/>
+    <input type="submit" value="Create Event">
+</form>
+
+
+<script type="text/javascript">
+  $(function(){
+    $("#id_start_date").datepicker();
+    $("#id_end_date").datepicker();
+  });
+</script>
+
+{% endblock %}
