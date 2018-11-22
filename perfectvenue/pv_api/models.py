@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.core import serializers
 
 
 class User(AbstractUser):
@@ -14,9 +15,9 @@ class Venue(models.Model):
     name = models.CharField(max_length=200)
     address = models.TextField()
     description = models.TextField()
-    occupancy = models.IntegerField()
-    parking_notes = models.TextField()
-    logo = models.URLField()
+    occupancy = models.IntegerField(null=True)
+    parking_notes = models.TextField(null=True)
+    logo = models.URLField(null=True)
 
     def search_venue(self, query_string):
         return self.objects.filter(name=query_string)
@@ -26,20 +27,28 @@ class Venue(models.Model):
 
 
 class Space(models.Model):
-    # STATUSES = (
-    #     ('BK', 'BOOKED'),
-    #     ('OP', 'OPEN')
-    # )
+
     venue = models.ForeignKey(Venue, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
-    # status = models.CharField(choices=STATUSES, max_length=200)
-
-    # def is_open(self):
-    #     return self.status == 'OP'
 
     # TODO: this method should be checking to see if there is an event with this space for a given date
-    # def is_booked(self):
-    #     return self.status == 'BK'
+    # TODO: query event by start and end date
+    # TODO: if queried event has space, return as "unavailable" else return as "available"
+
+    @classmethod
+    def is_booked(cls, venue_object, start_date, end_date):
+        events = Event.objects.filter(venue=venue_object, start_date__gte=start_date, end_date__lte=end_date)
+        spaces = {'booked': [], 'available': []}
+        if events.exists():
+            for event in events:
+                for space in event.spaces.all():
+                    spaces['booked'].append(serializers.serialize("json", [space]))
+        else:
+            event = Event.objects.get(venue=venue_object)
+            spaces['available'].append(serializers.serialize("json", event.spaces.all()))
+
+        print 'GOT OUR SPACES.....', spaces
+        return spaces
 
     def __str__(self):
         return "{} - {}".format(self.venue.name, self.name)
@@ -57,8 +66,11 @@ class Event(models.Model):
     spaces = models.ManyToManyField(Space)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
-    notes = models.TextField()
+    notes = models.TextField(null=True)
     status = models.CharField(choices=STATUSES, max_length=200)
+
+    def get_spaces(self):
+        return self.spaces
 
     def book(self, venue_id, space_ids, date, notes):
         venue = Venue.objects.get(id=venue_id)
@@ -88,4 +100,7 @@ class Event(models.Model):
         return self.status == 'CN'
 
     def __str__(self):
-        return self.name
+        if self.start_date and self.end_date:
+            return '{} ({} to {})'.format(self.name, self.start_date.date(), self.end_date.date())
+        else:
+            return '{}'.format(self.name)
