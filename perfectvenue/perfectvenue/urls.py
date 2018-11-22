@@ -16,6 +16,7 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 from pv_api.views import events, venues, pv_api
+import notifications.urls
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
@@ -24,4 +25,5 @@ urlpatterns = [
     url('accounts/select/', pv_api.SignUpView.as_view(), name='signup'),
     url('accounts/signup/venue_coordinator/', venues.CoordinatorSignUpView.as_view(), name='venue_coordinator_signup'),
     url('accounts/signup/event_coordinator/', events.CoordinatorSignUpView.as_view(), name='event_coordinator_signup'),
+    url('^inbox/notifications/', include(notifications.urls, namespace='notifications')),
 ]

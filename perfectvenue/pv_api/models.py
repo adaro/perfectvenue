@@ -4,6 +4,10 @@ from __future__ import unicode_literals
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core import serializers
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+from notifications.signals import notify
 
 
 class User(AbstractUser):
@@ -18,6 +22,7 @@ class Venue(models.Model):
     occupancy = models.IntegerField(null=True)
     parking_notes = models.TextField(null=True)
     logo = models.URLField(null=True)
+    coordinators = models.ManyToManyField(User)
 
     def search_venue(self, query_string):
         return self.objects.filter(name=query_string)
@@ -68,16 +73,14 @@ class Event(models.Model):
     end_date = models.DateTimeField()
     notes = models.TextField(null=True)
     status = models.CharField(choices=STATUSES, max_length=200)
+    coordinators = models.ManyToManyField(User)
 
     def get_spaces(self):
         return self.spaces
 
-    def book(self, venue_id, space_ids, date, notes):
+    def book(self, venue_id, space_ids, start_date, end_date, notes):
         venue = Venue.objects.get(id=venue_id)
-        booking = self.objects.create(venue=venue, date=date, notes=notes, status='PN')
-
-        # TODO: function that checks to see if a particular Space ID requires sibling spaces to also be booked
-        # TODO: based on time of year, [ ], [ ]
+        booking = self.objects.create(venue=venue, start_date=start_date, end_date=end_date, notes=notes, status='PN')
         for spid in space_ids:
             space = Space.objects.get(id=spid)
             booking.spaces.add(space)
@@ -104,3 +107,10 @@ class Event(models.Model):
             return '{} ({} to {})'.format(self.name, self.start_date.date(), self.end_date.date())
         else:
             return '{}'.format(self.name)
+
+
+@receiver(post_save, sender=Event, dispatch_uid="event_created")
+def send_notification(sender, instance, **kwargs):
+     print 'Sending Notification'
+     # syntax - notify.send(actor, recipient, verb, action_object, target, level, description, public, timestamp, **kwargs)
+     notify.send(instance, recipient=instance.venue.coordinators.all(), verb='Event was saved')

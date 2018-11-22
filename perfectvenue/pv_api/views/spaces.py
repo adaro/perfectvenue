@@ -1,6 +1,5 @@
-from django.contrib.auth import login
-from django.shortcuts import redirect, HttpResponse
-from django.views.generic import CreateView, View
+from django.shortcuts import HttpResponse
+from django.views.generic import View
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.core import serializers
