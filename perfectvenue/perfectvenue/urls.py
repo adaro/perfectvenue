@@ -15,6 +15,8 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
+from django.views.decorators.csrf import csrf_exempt
+
 from pv_api.views import events, venues, pv_api
 import notifications.urls
 
@@ -24,6 +26,7 @@ urlpatterns = [
     url('accounts/', include('django.contrib.auth.urls')),
     url('accounts/select/', pv_api.SignUpView.as_view(), name='signup'),
     url('accounts/login/', pv_api.LoginView.as_view(), name='login'),
+    url('accounts/auth/', csrf_exempt(pv_api.AuthView.as_view()), name='auth'),
     url('accounts/redirect/', pv_api.RedirectView.as_view(), name='redirect'),
     url('accounts/signup/venue_coordinator/', venues.CoordinatorSignUpView.as_view(), name='venue_coordinator_signup'),
     url('accounts/signup/event_coordinator/', events.CoordinatorSignUpView.as_view(), name='event_coordinator_signup'),
