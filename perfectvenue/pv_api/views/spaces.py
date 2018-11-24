@@ -15,7 +15,6 @@ class SpaceView(View):
             if request.GET.get('start_date') and request.GET.get('end_date'):
                 spaces = Space.get_spaces(venue_object, request.GET.get('start_date'), request.GET.get('end_date'))
                 return HttpResponse(json.dumps(spaces), content_type="application/json")
-                # TODO: return spaces that are available for this date.
 
             spaces = serializers.serialize("json", Space.objects.filter(venue=venue_object))
             return HttpResponse(spaces, content_type="application/json")
@@ -28,4 +27,5 @@ class SpaceView(View):
         return HttpResponse(spaces, content_type="application/json")
 
     def post(self, request):
+        # TODO: create form for spaces to be iframed into frontend. similar to event form.
         pass

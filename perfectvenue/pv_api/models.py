@@ -25,9 +25,6 @@ class Venue(models.Model):
     logo = models.URLField(blank=True, null=True)
     coordinators = models.ManyToManyField(User)
 
-    def search_venue(self, query_string):
-        return self.objects.filter(name=query_string)
-
     def __str__(self):
         return self.name
 

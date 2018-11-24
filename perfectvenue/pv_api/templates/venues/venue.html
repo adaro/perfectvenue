@@ -1,0 +1,25 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+
+{% block messages %}
+    {% if message %}<div class='imp_message'>{{ message }}</div>{% endif %}
+{% endblock %}
+<style>
+    form {
+        display: flex;
+        flex-direction: column;
+        width: 20%;
+        margin: 0 auto;
+    }
+</style>
+
+
+<form action="/api/venues/" method="post">
+    {% csrf_token %}
+    {{ form }}
+    <br/>
+    <input type="submit" value="Add Venue">
+</form>
+
+{% endblock %}
