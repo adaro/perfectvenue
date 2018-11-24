@@ -9,49 +9,17 @@ import Popper from '@material-ui/core/Popper';
 import Paper from '@material-ui/core/Paper';
 import MenuItem from '@material-ui/core/MenuItem';
 import Chip from '@material-ui/core/Chip';
+import RestClient from '../HTTP/RestClient';
 
-const suggestions = [
-  { label: 'Afghanistan' },
-  { label: 'Aland Islands' },
-  { label: 'Albania' },
-  { label: 'Algeria' },
-  { label: 'American Samoa' },
-  { label: 'Andorra' },
-  { label: 'Angola' },
-  { label: 'Anguilla' },
-  { label: 'Antarctica' },
-  { label: 'Antigua and Barbuda' },
-  { label: 'Argentina' },
-  { label: 'Armenia' },
-  { label: 'Aruba' },
-  { label: 'Australia' },
-  { label: 'Austria' },
-  { label: 'Azerbaijan' },
-  { label: 'Bahamas' },
-  { label: 'Bahrain' },
-  { label: 'Bangladesh' },
-  { label: 'Barbados' },
-  { label: 'Belarus' },
-  { label: 'Belgium' },
-  { label: 'Belize' },
-  { label: 'Benin' },
-  { label: 'Bermuda' },
-  { label: 'Bhutan' },
-  { label: 'Bolivia, Plurinational State of' },
-  { label: 'Bonaire, Sint Eustatius and Saba' },
-  { label: 'Bosnia and Herzegovina' },
-  { label: 'Botswana' },
-  { label: 'Bouvet Island' },
-  { label: 'Brazil' },
-  { label: 'British Indian Ocean Territory' },
-  { label: 'Brunei Darussalam' },
-];
+let suggestions = []
+
+
 
 function renderInput(inputProps) {
-  const { InputProps, classes, ref, ...other } = inputProps;
-
+  const { InputProps, inputValue, searchVenue, classes, ref, ...other } = inputProps;
   return (
     <TextField
+    	onChange={searchVenue(inputValue)}
       disableUnderline={true}
       InputProps={{
         inputRef: ref,
@@ -66,21 +34,21 @@ function renderInput(inputProps) {
   );
 }
 
+
 function renderSuggestion({ suggestion, index, itemProps, highlightedIndex, selectedItem }) {
   const isHighlighted = highlightedIndex === index;
-  const isSelected = (selectedItem || '').indexOf(suggestion.label) > -1;
-
+  const isSelected = (selectedItem || '').indexOf(suggestion.fields.name) > -1;
   return (
     <MenuItem
       {...itemProps}
-      key={suggestion.label}
+      key={suggestion.fields.name}
       selected={isHighlighted}
       component="div"
       style={{
         fontWeight: isSelected ? 500 : 400,
       }}
     >
-      {suggestion.label}
+      {suggestion.fields.name}
     </MenuItem>
   );
 }
@@ -92,7 +60,7 @@ renderSuggestion.propTypes = {
   suggestion: PropTypes.shape({ label: PropTypes.string }).isRequired,
 };
 
-function getSuggestions(value) {
+function getSuggestions(value, suggestions) {
   const inputValue = deburr(value.trim()).toLowerCase();
   const inputLength = inputValue.length;
   let count = 0;
@@ -100,21 +68,28 @@ function getSuggestions(value) {
   return inputLength === 0
     ? []
     : suggestions.filter(suggestion => {
+
+    	console.log(suggestion.fields.name.toLowerCase(), inputValue)
+
         const keep =
-          count < 5 && suggestion.label.slice(0, inputLength).toLowerCase() === inputValue;
+          count < 5 && suggestion.fields.name.toLowerCase().includes(inputValue);
 
         if (keep) {
           count += 1;
         }
 
+        console.log(keep)
         return keep;
       });
+
+
 }
 
 const styles = theme => ({
   root: {
     flexGrow: 1,
     height: 50,
+    width: 275,
     marginLeft: 20,
     marginRight: 20,
 		top: 10,
@@ -157,7 +132,7 @@ const styles = theme => ({
 
 
 function IntegrationDownshift(props) {
-  const { classes } = props;
+  const { classes, suggestions, searchVenue } = props;
 
   return (
     <div className={classes.root}>
@@ -175,6 +150,8 @@ function IntegrationDownshift(props) {
             {renderInput({
               fullWidth: true,
               classes,
+              inputValue,
+              searchVenue,
               InputProps: getInputProps({
                 placeholder: 'Search a venue',
               }),
@@ -182,14 +159,16 @@ function IntegrationDownshift(props) {
             <div {...getMenuProps()}>
               {isOpen ? (
                 <Paper className={classes.paper} square>
-                  {getSuggestions(inputValue).map((suggestion, index) =>
+                  {getSuggestions(inputValue, suggestions).map((suggestion, index) =>
+
                     renderSuggestion({
                       suggestion,
                       index,
-                      itemProps: getItemProps({ item: suggestion.label }),
+                      itemProps: getItemProps({ item: suggestion.fields.name }),
                       highlightedIndex,
                       selectedItem,
                     }),
+
                   )}
                 </Paper>
               ) : null}

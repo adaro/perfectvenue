@@ -24,7 +24,10 @@ class PerfectvenueGlobals extends React.Component {
           if (!results[2]) return '';
           return decodeURIComponent(results[2].replace(/\+/g, " "));
       },
-
+      setSessionKey: (name, key) => {
+        localStorage.setItem(name, key)
+        window.history.pushState({}, document.title, "/"+window.location.href.substring(window.location.href.lastIndexOf('/') + 1).split("?")[0]);
+      },
       cleanURL: () => {
         window.history.pushState({}, document.title, "/"+window.location.href.substring(window.location.href.lastIndexOf('/') + 1).split("?")[0]);
       },

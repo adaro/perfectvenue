@@ -24,10 +24,8 @@ class CoordinatorSignUpView(CreateView):
         return redirect(settings.HOSTS[settings.ENV]['client'])
 
 
-@method_decorator(login_required, name='dispatch')
 class VenueView(View):
     form = VenueForm()
-
     def get(self, request, venue_id=None):
         if request.GET.get('name'):
             venues = serializers.serialize("json", Venue.objects.filter(name__icontains=request.GET.get('name')))

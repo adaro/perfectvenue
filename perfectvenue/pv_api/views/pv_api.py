@@ -2,7 +2,6 @@ from django.shortcuts import HttpResponse
 from django.shortcuts import redirect, render
 from django.views.generic import View
 from django.contrib.sessions.models import Session
-
 from perfectvenue import settings
 import json
 
@@ -17,8 +16,7 @@ class LoginView(View):
 
 
 class AuthView(View):
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
         params = json.loads(request.body).get('params')
         try:
             Session.objects.get(session_key=params['sessionKey'])
@@ -29,5 +27,5 @@ class AuthView(View):
 
 
 class RedirectView(View):
-    def get(self, request, *args, **kwargs):
+    def get(self, request):
         return redirect('{}?session_key={}'.format(settings.HOSTS[settings.ENV]['client'], request.session.session_key))

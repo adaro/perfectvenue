@@ -50,8 +50,6 @@ export default (type, endpoint, params) => {
                     throw new Error(response.statusText);
                 }
 
-                authenticate(response.clone().json())
-
                 return response.json();
             })
     }

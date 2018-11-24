@@ -4,7 +4,6 @@ import theme from './Theme'
 import Main from './Main';
 import './App.css';
 
-
 class App extends Component {
 
   render() {
