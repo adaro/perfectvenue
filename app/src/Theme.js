@@ -28,7 +28,7 @@ export default createMuiTheme({
 
   typography: {
     useNextVariants: true,
-    suppressDeprecationWarnings: true
+    suppressDeprecationWarnings: true,
   },
 
   overrides: {
@@ -36,19 +36,19 @@ export default createMuiTheme({
         // Name of the styleSheet
         underline: {
           '&:hover:not($disabled):before': {
-            borderColor: 'white',
-            height: 1,
+            display: 'none',
           },
           '&:hover:not($disabled):after': {
-            borderColor: 'white',
-            height: 1,
+            display: 'none',
           },
           '&:hover:not($disabled):not($error):not($focused):before': {
-            borderBottomColor: '#cdcde7',
             display: 'none'
           },
           '&:after': {
-            borderBottomColor: 'white',
+            display: 'none',
+          },
+          '&:before': {
+            display: 'none',
           }
         },
       },

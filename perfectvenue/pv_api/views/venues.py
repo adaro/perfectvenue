@@ -25,7 +25,6 @@ class CoordinatorSignUpView(CreateView):
 
 
 class VenueView(View):
-    form = VenueForm()
     def get(self, request, venue_id=None):
         if request.GET.get('name'):
             venues = serializers.serialize("json", Venue.objects.filter(name__icontains=request.GET.get('name')))
@@ -34,10 +33,14 @@ class VenueView(View):
             venue = serializers.serialize("json", Venue.objects.filter(id=venue_id))
             return HttpResponse(venue, content_type="application/json")
 
-        return render(request, 'venues/venue.html', {"form": self.form})
-
     def post(self, request):
         venue_form = VenueForm(request.POST)
         venue_form.save()
         #TODO: send reponse back to iframe to close? or simply render a thankyou style view
         return redirect(settings.HOSTS[settings.ENV]['client'])
+
+@method_decorator(login_required, name='dispatch')
+class AddVenue(View):
+    form = VenueForm()
+    def get(self, request):
+        return render(request, 'venues/venue.html', {"form": self.form})

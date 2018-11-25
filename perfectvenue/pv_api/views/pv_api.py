@@ -2,7 +2,9 @@ from django.shortcuts import HttpResponse
 from django.shortcuts import redirect, render
 from django.views.generic import View
 from django.contrib.sessions.models import Session
+from django.contrib.auth import login
 from perfectvenue import settings
+from ..models import User
 import json
 
 class SignUpView(View):
@@ -18,8 +20,13 @@ class LoginView(View):
 class AuthView(View):
     def post(self, request):
         params = json.loads(request.body).get('params')
+        print params['sessionKey']
         try:
-            Session.objects.get(session_key=params['sessionKey'])
+            session = Session.objects.get(session_key=params['sessionKey'])
+            session_data = session.get_decoded()
+            uid = session_data.get('_auth_user_id')
+            user = User.objects.get(id=uid)
+            login(request, user)
             return HttpResponse(json.dumps({'loggedIn': True}),
                                 content_type="application/json")
         except (Session.DoesNotExist, KeyError):

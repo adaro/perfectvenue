@@ -7,7 +7,7 @@ from django.core import serializers
 from perfectvenue.forms import EventCoordinatorSignUpForm
 from perfectvenue import settings
 from ..forms import EventForm
-from ..models import User, Event
+from ..models import User, Event, Venue, Space
 
 
 class CoordinatorSignUpView(CreateView):
@@ -30,6 +30,27 @@ class EventView(View):
     form = EventForm()
 
     def get(self, request, event_id=None):
+        if request.GET.get('venue') and request.GET.get('start_date') and request.GET.get('end_date'):
+            start_date = request.GET.get('start_date')
+            end_date = request.GET.get('end_date')
+            venue_object = Venue.objects.get(id=request.GET.get('venue'))
+            # events = Event.objects.filter(venue=venue_object,
+            #                                start_date__gte=start_date,
+            #                                end_date__lte=end_date)
+
+
+            # TODO: this will require an approval process. The issue is we have spaces that might conflict  with this form
+            spaces = Space.objects.filter(venue=venue_object)
+            self.form.fields["spaces"].queryset = spaces
+
+            self.form.initial["start_date"] = start_date
+            self.form.initial["end_date"] = end_date
+
+            # print self.form.fields["spaces"].queryset.exists() # TODO: if no spaces exist, then render an update
+
+            self.form.fields["venue"].queryset = Venue.objects.filter(id=venue_object.id)
+            self.form.initial['venue'] = Venue.objects.get(id=venue_object.id)
+
         if request.GET.get('name'):
             events = serializers.serialize("json", Event.objects.filter(name__icontains=request.GET.get('name')))
             return HttpResponse(events, content_type="application/json")
@@ -37,8 +58,6 @@ class EventView(View):
             event = serializers.serialize("json", Event.objects.filter(id=event_id))
             return HttpResponse(event, content_type="application/json")
 
-        # events = serializers.serialize("json", Event.objects.all())
-        # return HttpResponse(events, content_type="application/json")
         return render(request, 'events/event.html', {"form": self.form})
 
 

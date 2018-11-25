@@ -7,7 +7,6 @@ from ..models import Space, Venue
 import json
 
 
-@method_decorator(login_required, name='dispatch')
 class SpaceView(View):
     def get(self, request, space_id=None):
         if request.GET.get('venue'):

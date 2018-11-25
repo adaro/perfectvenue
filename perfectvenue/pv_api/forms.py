@@ -7,6 +7,7 @@ class EventForm(ModelForm):
     class Meta:
         model = Event
         fields = '__all__'
+        exclude = ['status']
 
         widgets = {
             'start_date': forms.DateTimeInput(attrs={'class':'datepicker'}),

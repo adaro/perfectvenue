@@ -1,4 +1,7 @@
 import React from 'react';
+import {
+  Link
+} from 'react-router-dom'
 import PropTypes from 'prop-types';
 import deburr from 'lodash/deburr';
 import keycode from 'keycode';
@@ -9,10 +12,6 @@ import Popper from '@material-ui/core/Popper';
 import Paper from '@material-ui/core/Paper';
 import MenuItem from '@material-ui/core/MenuItem';
 import Chip from '@material-ui/core/Chip';
-import RestClient from '../HTTP/RestClient';
-
-let suggestions = []
-
 
 
 function renderInput(inputProps) {
@@ -39,7 +38,7 @@ function renderSuggestion({ suggestion, index, itemProps, highlightedIndex, sele
   const isHighlighted = highlightedIndex === index;
   const isSelected = (selectedItem || '').indexOf(suggestion.fields.name) > -1;
   return (
-    <MenuItem
+    <Link to={"/venues/" + suggestion.pk}><MenuItem
       {...itemProps}
       key={suggestion.fields.name}
       selected={isHighlighted}
@@ -48,8 +47,9 @@ function renderSuggestion({ suggestion, index, itemProps, highlightedIndex, sele
         fontWeight: isSelected ? 500 : 400,
       }}
     >
-      {suggestion.fields.name}
-    </MenuItem>
+    {suggestion.fields.name}
+
+    </MenuItem></Link>
   );
 }
 renderSuggestion.propTypes = {
@@ -110,17 +110,18 @@ const styles = theme => ({
     margin: `${theme.spacing.unit / 2}px ${theme.spacing.unit / 4}px`,
   },
   inputRoot: {
-  	color: 'white',
     flexWrap: 'wrap',
   },
   inputInput: {
-  	color: 'white',
+		backgroundColor: 'white',
+    borderRadius: 5,
+    color: '#464649',
+    padding: 7,
     width: 'auto',
     flexGrow: 1,
-    borderBottom: "1px solid white",
 
     '&::placeholder': {
-      color: 'white',
+      color: '#464649',
       opacity: '1 !important'
     },
 

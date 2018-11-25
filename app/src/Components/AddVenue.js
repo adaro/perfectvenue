@@ -57,9 +57,9 @@ class AddVenue extends Component {
           onClose={this.handleClose}
         >
           <div style={getModalStyle()} className={classes.paper}>
-          	<Iframe url="http://127.0.0.1:8000/api/venues/"
+          	<Iframe url="http://127.0.0.1:8000/api/venues/add/"
 			        width="100%"
-			        height="450px"
+			        height="700px"
 			        id="myId"
 			        className="myClassname"
 			        display="initial"

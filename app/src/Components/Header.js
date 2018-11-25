@@ -63,7 +63,7 @@ const styles = {
 
 class MenuAppBar extends React.Component {
   state = {
-    auth: false,
+    // auth: false,
     anchorEl: null,
     suggestions: [],
     inputValue: null
@@ -71,16 +71,35 @@ class MenuAppBar extends React.Component {
 
   componentDidMount = () => {
 
+    // console.log(widoiframe.contentWindow)
+
+    // TODO: perhaps get this into a wrapper compoenent?
     const sessionKey = getParam('session_key', window.location.href)
     if (sessionKey) {
       setSessionKey('session_key', sessionKey)
     }
 
-    const getAuthPromise = RestClient('POST', '/accounts/auth/', {sessionKey: localStorage.getItem('session_key')})
-    const self = this;
-    getAuthPromise.then(function(resp) {
-      self.setState({auth: resp.loggedIn})
-    })
+    // const getAuthPromise = RestClient('POST', '/accounts/auth/', {sessionKey: localStorage.getItem('session_key')})
+    // const self = this;
+    // getAuthPromise.then(function(resp) {
+    //   self.setState({auth: resp.loggedIn})
+    // })
+
+   // {auth && (
+
+   //    <div className={classes.linkContainer}>
+   //      | <a className={classes.link} href={API.host + '/accounts/logout'}>Logout</a>
+   //    </div>
+
+   //  )}
+
+   //  {!auth && (
+
+   //    <div className={classes.linkContainer}>
+   //      | <a className={classes.link} href={API.host + '/accounts/login'}>Login</a>
+   //    </div>
+
+   //  )}
 
   }
 
@@ -102,13 +121,10 @@ class MenuAppBar extends React.Component {
       const searchVenuesPromise = RestClient('GET', '/api/venues/?name=' + value)
       const self = this;
       searchVenuesPromise.then(function(suggestions) {
-        console.log(suggestions)
         self.setState({suggestions: suggestions, inputValue: value})
       })
     }
-
     return
-
   }
 
 
@@ -131,24 +147,10 @@ class MenuAppBar extends React.Component {
 
             <div className={classes.container}>
               <div className={classes.linkContainer}>
-                <Link className={classes.link} to="/venues/add">Add Venue</Link>
+                <Link className={classes.link} to="/venues/new/add">Add Venue</Link>
               </div>
 
-              {auth && (
 
-                <div className={classes.linkContainer}>
-                  | <a className={classes.link} href={API.host + '/accounts/logout'}>Logout</a>
-                </div>
-
-              )}
-
-              {!auth && (
-
-                <div className={classes.linkContainer}>
-                  | <a className={classes.link} href={API.host + '/accounts/login'}>Login</a>
-                </div>
-
-              )}
 
               </div>
             </Toolbar>

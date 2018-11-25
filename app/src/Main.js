@@ -8,6 +8,7 @@ import {
 import Header from './Components/Header';
 import Home from './Views/Home';
 import AddVenue from './Components/AddVenue';
+import Venue from './Components/Venue';
 import history from './history';
 
 
@@ -20,7 +21,8 @@ class Main extends Component {
         <div className="Main">
            <Header/>
            <Route exact path='/' component={Home}/>
-           <Route exact path='/venues/add' component={(props) => <AddVenue {...props} open={true} />}/>
+           <Route exact path='/venues/new/add' component={(props) => <AddVenue {...props} open={true} />}/>
+           <Route exact path='/venues/:id' component={Venue}/>
         </div>
       </Router>
     );
