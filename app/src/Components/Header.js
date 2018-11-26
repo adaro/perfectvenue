@@ -75,30 +75,27 @@ class MenuAppBar extends React.Component {
 
     // TODO: Get All Auth stuff into a wrapper compoenent?
     window.addEventListener('message', this.handleMessage, false);
-
-    const sessionUid = getParam('uid', window.location.href)
+    const sessionUid = getParam('pvToken', window.location.href)
     if (sessionUid) {
-      setSessionKey('pvuid', sessionUid)
+      setSessionKey('pvToken', sessionUid)
     }
-
-    const getAuthPromise = RestClient('POST', '/accounts/auth/', {pvuid: localStorage.getItem('pvuid')})
+    const getAuthPromise = RestClient('POST', '/accounts/auth/', {pvToken: localStorage.getItem('pvToken')})
     const self = this;
     getAuthPromise.then(function(resp) {
       self.setState({auth: resp.loggedIn})
     })
-
   }
 
   handleMessage = (event) => {
       if (event.origin != "http://127.0.0.1:8000") { return; }
       if (event.data) {
-        setSessionKey('pvuid', event.data)
+        setSessionKey('pvToken', event.data)
         this.setState({auth: true})
       }
   }
 
   logout = (event, checked) => {
-    localStorage.removeItem('pvuid')
+    localStorage.removeItem('pvToken')
     window.location.href = API.host + '/accounts/logout'
   };
 

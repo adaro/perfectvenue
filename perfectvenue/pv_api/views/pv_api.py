@@ -7,6 +7,9 @@ from perfectvenue import settings
 from ..models import User
 import json
 
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from rest_framework.authtoken.models import Token
 class SignUpView(View):
     def get(self, request, *args, **kwargs):
         return render(request, 'registration/sign-up.html', *args, **kwargs)
@@ -14,26 +17,29 @@ class SignUpView(View):
 
 class LoginView(View):
     def get(self, request, *args, **kwargs):
+        print request.META['HTTP_REFERER']
         return render(request, 'registration/login.html', *args, **kwargs)
 
 
 class AuthView(View):
     def post(self, request):
-        #TODO: change this to be and API token
         params = json.loads(request.body).get('params')
-
         try:
-            user = User.objects.get(id=params['pvuid'])
-            login(request, user)
+            Token.objects.get(key=params['pvToken'])
             return HttpResponse(json.dumps({'loggedIn': True}),
                                 content_type="application/json")
-        except (User.DoesNotExist, KeyError):
+        except (Token.DoesNotExist, KeyError):
             return HttpResponse(json.dumps({'loggedIn': False}), content_type="application/json")
 
 
 class RedirectView(View):
     def get(self, request):
-        session = Session.objects.get(session_key=request.session.session_key)
-        session_data = session.get_decoded()
-        uid = session_data.get('_auth_user_id')
-        return redirect('{}?uid={}'.format(settings.HOSTS[settings.ENV]['client'], uid))
+        print self.request.GET.get('next')
+        token, created = Token.objects.get_or_create(user=request.user)
+        return redirect('{}?pvToken={}'.format(settings.HOSTS[settings.ENV]['client'], token.key))
+
+
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def create_auth_token(sender, instance=None, created=False, **kwargs):
+    if created:
+        Token.objects.create(user=instance)

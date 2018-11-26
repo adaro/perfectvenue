@@ -7,7 +7,7 @@ export default (type, endpoint, params) => {
         const request = new Request(API.host + endpoint, {
             method: 'POST',
             body: JSON.stringify({ params }),
-            headers: new Headers({ 'Content-Type': 'application/json' }),
+            headers: new Headers({ 'Content-Type': 'application/json', 'Authorization': 'Token ' + localStorage.getItem('pvToken') }),
         })
         return fetch(request)
             .then(response => {
@@ -24,7 +24,7 @@ export default (type, endpoint, params) => {
         const request = new Request(API.host + endpoint, {
             method: 'PUT',
             body: JSON.stringify({ params }),
-            headers: new Headers({ 'Content-Type': 'application/json' }),
+            headers: new Headers({ 'Content-Type': 'application/json', 'Authorization': 'Token ' + localStorage.getItem('pvToken') }),
         })
         return fetch(request)
             .then(response => {
@@ -41,7 +41,7 @@ export default (type, endpoint, params) => {
         const request = new Request(API.host + endpoint, {
             method: 'DELETE',
             body: JSON.stringify({ params }),
-            headers: new Headers({ 'Content-Type': 'application/json' }),
+            headers: new Headers({ 'Content-Type': 'application/json', 'Authorization': 'Token ' + localStorage.getItem('pvToken') }),
         })
         return fetch(request)
             .then(response => {
@@ -55,36 +55,29 @@ export default (type, endpoint, params) => {
     }
 
     if (type === 'GET') {
-
          var url = new URL(API.host + endpoint)
-
         if (params) {
           Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
         }
 
         const request = new Request(url, {
             method: 'GET',
-            headers: new Headers({ 'Content-Type': 'application/json' }),
+            headers: new Headers({ 'Content-Type': 'application/json', 'Authorization': 'Token ' + localStorage.getItem('pvToken') }),
         })
 
         return fetch(request)
             .then(response => {
 
+                if (response.status == 401) {
+                    const new_url = window.location.href = API.host + '/accounts/login'
+                    window.location.href = new_url
+                }
+
                 if (response.status < 200 || response.status >= 300) {
-
-                    if (response.status == 401) {
-                        window.location.href = API.host + "/accounts/login"
-                    }
-
                     throw new Error(response.statusText);
                 }
 
-                // if (response.redirected) {
-                //     const new_path = '?next=' + window.location.href
-                //     const new_url = response.url.split('?')[0] + new_path
-                //     window.location.href = new_url
-                // }
-
+                console.log(response)
 
                 return response.json();
             })

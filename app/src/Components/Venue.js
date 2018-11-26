@@ -111,7 +111,6 @@ class Venue extends Component {
     	value[0].toISOString().split('T')[0] + '&end_date=' +
     	value[1].toISOString().split('T')[0]
 
-    console.log(url)
     const getSpacesPromise = RestClient('GET', url)
     const self = this;
     getSpacesPromise.then(function(resp) {
@@ -137,7 +136,7 @@ class Venue extends Component {
 	renderModalIframe = () => {
 		const { classes } = this.props;
 
-		const url = "http://127.0.0.1:8000/api/events/?venue=" + this.state.venueId +  "&start_date=" + this.state.startDate + "&end_date=" + this.state.endDate
+		const url = "http://127.0.0.1:8000/api/events/create/?venue=" + this.state.venueId +  "&start_date=" + this.state.startDate + "&end_date=" + this.state.endDate
 		return (
 				<Modal
           aria-labelledby="simple-modal-title"

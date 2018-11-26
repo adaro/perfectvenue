@@ -60,7 +60,7 @@ class Event extends Component {
 
 	getEvents = () => {
 
-    const getEventsPromise = RestClient('GET', '/api/events/?venue=' + this.props.match.params.id + "&pvuid=" + localStorage.getItem('pvuid'))
+    const getEventsPromise = RestClient('GET', '/api/events/?venue=' + this.props.match.params.id)
     const self = this;
     getEventsPromise.then(function(resp) {
       self.setState({events: resp})
@@ -78,7 +78,7 @@ class Event extends Component {
 
 	updateStatus = (status) => {
 		console.log(status)
-		const putEventStatusPromise = RestClient('PUT', '/api/events/' + this.state.selectedEvent.pk + "/",  {"status": status, "pvuid": localStorage.getItem('pvuid')})
+		const putEventStatusPromise = RestClient('PUT', '/api/events/' + this.state.selectedEvent.pk + "/",  {"status": status})
 		putEventStatusPromise.then(function(resp) {
 			console.log(resp)
 		})
