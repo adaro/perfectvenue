@@ -71,8 +71,20 @@ export default (type, endpoint, params) => {
             .then(response => {
 
                 if (response.status < 200 || response.status >= 300) {
+
+                    if (response.status == 401) {
+                        window.location.href = API.host + "/accounts/login"
+                    }
+
                     throw new Error(response.statusText);
                 }
+
+                // if (response.redirected) {
+                //     const new_path = '?next=' + window.location.href
+                //     const new_url = response.url.split('?')[0] + new_path
+                //     window.location.href = new_url
+                // }
+
 
                 return response.json();
             })

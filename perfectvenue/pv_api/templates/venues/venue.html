@@ -22,4 +22,8 @@
     <input type="submit" value="Add Venue">
 </form>
 
+<script>
+  window.parent.postMessage("{{ user.id }}", 'http://localhost:3000')
+</script>
+
 {% endblock %}

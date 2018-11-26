@@ -1,9 +1,10 @@
 from django.conf.urls import url
 from pv_api.views import events, venues, spaces, notifications
+from django.views.decorators.csrf import csrf_exempt
 
 urlpatterns = [
     url('events/$', events.EventView.as_view(), name='events'),
-    url('events/(?P<event_id>\w+)/$', events.EventView.as_view(), name='event'),
+    url('events/(?P<event_id>\w+)/$', csrf_exempt(events.EventView.as_view()), name='event'),
     url('venues/$', venues.VenueView.as_view(), name='venues'),
     url('venues/add/$', venues.AddVenue.as_view(), name='venues.add'),
     url('venues/(?P<venue_id>\w+)/$', venues.VenueView.as_view(), name='venue'),

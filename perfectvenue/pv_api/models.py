@@ -26,7 +26,7 @@ class Venue(models.Model):
     occupancy = models.IntegerField(blank=True, null=True)
     parking_notes = models.TextField(blank=True, null=True)
     logo = models.URLField(blank=True, null=True)
-    coordinators = models.ManyToManyField(User)
+    coordinators = models.ManyToManyField(User)  # venue coords
 
     def __str__(self):
         return self.name
@@ -80,7 +80,7 @@ class Event(models.Model):
     end_date = models.DateTimeField()
     notes = models.TextField(blank=True, null=True)
     status = models.CharField(choices=STATUSES, max_length=200, blank=True, null=True)
-    coordinators = models.ManyToManyField(User)
+    coordinators = models.ManyToManyField(User) # event coords
 
     def get_spaces(self):
         return self.spaces

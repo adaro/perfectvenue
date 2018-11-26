@@ -7,8 +7,9 @@ import {
 } from 'react-router-dom'
 import Header from './Components/Header';
 import Home from './Views/Home';
-import AddVenue from './Components/AddVenue';
+import AddVenue from './Views/AddVenue';
 import Venue from './Components/Venue';
+import Event from './Views/Event';
 import history from './history';
 
 
@@ -23,6 +24,7 @@ class Main extends Component {
            <Route exact path='/' component={Home}/>
            <Route exact path='/venues/new/add' component={(props) => <AddVenue {...props} open={true} />}/>
            <Route exact path='/venues/:id' component={Venue}/>
+           <Route exact path='/venues/:id/events' component={Event}/>
         </div>
       </Router>
     );

@@ -52,7 +52,8 @@ const styles = {
     padding: 20,
     textDecoration: 'none',
     fontSize: 15,
-    fontWeight: 600
+    fontWeight: 600,
+    cursor: 'pointer'
   },
   linkContainer: {
     color: 'white',
@@ -61,9 +62,10 @@ const styles = {
 };
 
 
+
 class MenuAppBar extends React.Component {
   state = {
-    // auth: false,
+    auth: false,
     anchorEl: null,
     suggestions: [],
     inputValue: null
@@ -71,40 +73,32 @@ class MenuAppBar extends React.Component {
 
   componentDidMount = () => {
 
-    // console.log(widoiframe.contentWindow)
+    // TODO: Get All Auth stuff into a wrapper compoenent?
+    window.addEventListener('message', this.handleMessage, false);
 
-    // TODO: perhaps get this into a wrapper compoenent?
-    const sessionKey = getParam('session_key', window.location.href)
-    if (sessionKey) {
-      setSessionKey('session_key', sessionKey)
+    const sessionUid = getParam('uid', window.location.href)
+    if (sessionUid) {
+      setSessionKey('pvuid', sessionUid)
     }
 
-    // const getAuthPromise = RestClient('POST', '/accounts/auth/', {sessionKey: localStorage.getItem('session_key')})
-    // const self = this;
-    // getAuthPromise.then(function(resp) {
-    //   self.setState({auth: resp.loggedIn})
-    // })
-
-   // {auth && (
-
-   //    <div className={classes.linkContainer}>
-   //      | <a className={classes.link} href={API.host + '/accounts/logout'}>Logout</a>
-   //    </div>
-
-   //  )}
-
-   //  {!auth && (
-
-   //    <div className={classes.linkContainer}>
-   //      | <a className={classes.link} href={API.host + '/accounts/login'}>Login</a>
-   //    </div>
-
-   //  )}
+    const getAuthPromise = RestClient('POST', '/accounts/auth/', {pvuid: localStorage.getItem('pvuid')})
+    const self = this;
+    getAuthPromise.then(function(resp) {
+      self.setState({auth: resp.loggedIn})
+    })
 
   }
 
-  // LOGOUT CONTROLLER
-  handleChange = (event, checked) => {
+  handleMessage = (event) => {
+      if (event.origin != "http://127.0.0.1:8000") { return; }
+      if (event.data) {
+        setSessionKey('pvuid', event.data)
+        this.setState({auth: true})
+      }
+  }
+
+  logout = (event, checked) => {
+    localStorage.removeItem('pvuid')
     window.location.href = API.host + '/accounts/logout'
   };
 
@@ -150,6 +144,21 @@ class MenuAppBar extends React.Component {
                 <Link className={classes.link} to="/venues/new/add">Add Venue</Link>
               </div>
 
+              {auth && (
+
+                <div className={classes.linkContainer}>
+                  | <a className={classes.link} onClick={this.logout}>Logout</a>
+                </div>
+
+              )}
+
+              {!auth && (
+
+                <div className={classes.linkContainer}>
+                  | <a className={classes.link} href={API.host + '/accounts/login'}>Login</a>
+                </div>
+
+              )}
 
 
               </div>

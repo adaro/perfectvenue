@@ -31,10 +31,38 @@
   }
 }
 
+.centered {
+  margin: 0 auto;
+}
+
+.flex {
+  display: flex;
+  flex-direction: row;
+  /* TODO: add media queris for modbile*/
+}
+
+.flex-item-25 {
+  width: 25%;
+}
+
+.flex-item-50 {
+  width: 50%;
+}
+
+.flex-item-75 {
+  width: 75%;
+}
+
 .react-calendar__tile--active, .react-calendar__tile--hasActive {
   background-color: #8247ff;
 }
 
 .react-calendar button:enabled:hover{
   background-color: rgba(130,71,255, .5);
+}
+
+.rbc-calendar {
+  margin-left: 20px;
+  min-height: 500px;
+  margin-top: 20px;
 }

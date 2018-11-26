@@ -39,6 +39,7 @@ class VenueView(View):
         #TODO: send reponse back to iframe to close? or simply render a thankyou style view
         return redirect(settings.HOSTS[settings.ENV]['client'])
 
+
 @method_decorator(login_required, name='dispatch')
 class AddVenue(View):
     form = VenueForm()

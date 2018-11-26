@@ -4,7 +4,7 @@ import RestClient from '../HTTP/RestClient';
 import { withStyles } from '@material-ui/core/styles';
 import BackIcon from '@material-ui/icons/ArrowBack';
 import Button from '@material-ui/core/Button';
-import AddIcon from '@material-ui/icons/Add';
+import CheckIcon from '@material-ui/icons/Check';
 import Iframe from 'react-iframe'
 import Modal from '@material-ui/core/Modal';
 
@@ -132,6 +132,8 @@ class Venue extends Component {
     this.setState({ open: false });
   };
 
+
+  // TODO: this should be in a seperate AddEvent.js compoenent
 	renderModalIframe = () => {
 		const { classes } = this.props;
 
@@ -175,7 +177,7 @@ class Venue extends Component {
 	    			<p className={classes.venueDescritpion}>{this.state.venue.description}</p></div>
 	    			<div classes={classes.bookingContainer}>
 				      <Button disabled={this.state.startDate == null} variant="contained" color="primary" aria-label="Request to Book" className={classes.button} onClick={this.requestBooking}>
-				        <AddIcon className={classes.extendedIcon} />
+				        <CheckIcon className={classes.extendedIcon} />
 				        Request to Book
 				      </Button>
 			        <Calendar
