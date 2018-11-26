@@ -35,10 +35,14 @@ class VenueView(View):
 
     def post(self, request):
         venue_form = VenueForm(request.POST)
-        venue_form.save()
-        #TODO: send reponse back to iframe to close? or simply render a thankyou style view
-        return redirect(settings.HOSTS[settings.ENV]['client'])
+        venue_saved = venue_form.save()
+        return redirect("{}{}{}".format("/api/venues/", venue_saved.id, "/created"))
 
+
+class CreatedVenueView(View):
+    def get(self, request, venue_id=None):
+        venue = Venue.objects.get(id=venue_id)
+        return render(request, 'venues/created.html', context={'venue': venue})
 
 @method_decorator(login_required, name='dispatch')
 class AddVenue(View):

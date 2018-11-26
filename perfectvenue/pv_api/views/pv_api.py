@@ -19,6 +19,7 @@ class LoginView(View):
 
 class AuthView(View):
     def post(self, request):
+        #TODO: change this to be and API token
         params = json.loads(request.body).get('params')
 
         try:
@@ -32,7 +33,6 @@ class AuthView(View):
 
 class RedirectView(View):
     def get(self, request):
-        print request.GET
         session = Session.objects.get(session_key=request.session.session_key)
         session_data = session.get_decoded()
         uid = session_data.get('_auth_user_id')

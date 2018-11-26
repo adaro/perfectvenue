@@ -6,6 +6,8 @@ from django.core import serializers
 from perfectvenue.forms import EventCoordinatorSignUpForm
 from perfectvenue import settings
 from perfectvenue.decorators import pv_authentication
+# from django.contrib.auth.decorators import login_required
+
 
 from ..forms import EventForm
 from ..models import User, Event, Venue, Space
@@ -26,16 +28,12 @@ class CoordinatorSignUpView(CreateView):
         return redirect(settings.HOSTS[settings.ENV]['client'])
 
 
-@method_decorator(pv_authentication, name='dispatch')
+# @method_decorator(pv_authentication, name='dispatch')
+# @method_decorator(login_required, name='dispatch')
 class EventView(View):
     form = EventForm()
 
     def get(self, request, event_id=None):
-        if request.GET.get('venue'):
-            venue_object = Venue.objects.get(id=request.GET.get('venue'))
-            events = serializers.serialize("json", Event.objects.filter(venue=venue_object))
-            print events
-            return HttpResponse(events, content_type="application/json")
 
         if request.GET.get('venue') and request.GET.get('start_date') and request.GET.get('end_date'):
             start_date = request.GET.get('start_date')
@@ -49,6 +47,11 @@ class EventView(View):
             self.form.initial["end_date"] = end_date
             self.form.fields["venue"].queryset = Venue.objects.filter(id=venue_object.id)
             self.form.initial['venue'] = Venue.objects.get(id=venue_object.id)
+
+        if request.GET.get('venue') and not request.GET.get('start_date') and not request.GET.get('end_date') :
+            venue_object = Venue.objects.get(id=request.GET.get('venue'))
+            events = serializers.serialize("json", Event.objects.filter(venue=venue_object))
+            return HttpResponse(events, content_type="application/json")
 
         if request.GET.get('name'):
             events = serializers.serialize("json", Event.objects.filter(name__icontains=request.GET.get('name')))
@@ -64,6 +67,7 @@ class EventView(View):
         print 'posting to event'
         event_form = EventForm(request.POST)
         new_event = serializers.serialize("json", [event_form.save()])
+        #TODO: crrate thank you page
         return HttpResponse(new_event, content_type="application/json")
 
     def put(self, request, event_id):
