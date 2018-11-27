@@ -5,7 +5,7 @@ from django.utils.decorators import method_decorator
 from django.core import serializers
 from perfectvenue.forms import EventCoordinatorSignUpForm
 from perfectvenue import settings
-# from perfectvenue.decorators import pv_authentication
+from rest_framework.authtoken.models import Token
 from django.contrib.auth.decorators import login_required
 
 from rest_framework.decorators import api_view
@@ -14,6 +14,7 @@ from rest_framework.decorators import api_view
 from ..forms import EventForm
 from ..models import User, Event, Venue, Space
 import json
+
 
 class CoordinatorSignUpView(CreateView):
     model = User
@@ -26,8 +27,7 @@ class CoordinatorSignUpView(CreateView):
     def form_valid(self, form):
         user = form.save()
         login(self.request, user)
-        # TODO: this will redirect to a frontend view
-        return redirect(settings.HOSTS[settings.ENV]['client'])
+        return redirect('/accounts/redirect/')
 
 @method_decorator(login_required, name='dispatch')
 class CreateEventView(View):
@@ -46,18 +46,29 @@ class CreateEventView(View):
             self.form.initial["end_date"] = end_date
             self.form.fields["venue"].queryset = Venue.objects.filter(id=venue_object.id)
             self.form.initial['venue'] = Venue.objects.get(id=venue_object.id)
-            print 'rendering?'
 
-        return render(request, 'events/event.html', {"form": self.form})
+        token = Token.objects.get(user=request.user)
+        return render(request, 'events/event.html', {
+            "form": self.form,
+            "client": settings.HOSTS['PROD']['client'],
+            "token": token.key
+        })
+
+    def post(self, request):
+        print 'posting to event'
+        event_form = EventForm(request.POST)
+        new_event = serializers.serialize("json", [event_form.save()])
+        #TODO: crrate thank you page
+        return HttpResponse(new_event, content_type="application/json")
 
 
-@method_decorator(api_view(["GET", "POST", "PUT"]), name='dispatch')
+# TODO: we need a custom domain in order to use Token based auth (or so i think). When ready turn this back on and test
+# TODO: it works locally just fine and that's how i can be sure it's the SSL/HTTPS on AWS
+# @method_decorator(api_view(["GET", "PUT"]), name='dispatch')
 class EventView(View):
-
-
     def get(self, request, event_id=None):
 
-        if request.GET.get('venue') and not request.GET.get('start_date') and not request.GET.get('end_date'):
+        if request.GET.get('venue'):
             venue_object = Venue.objects.get(id=request.GET.get('venue'))
             events = serializers.serialize("json", Event.objects.filter(venue=venue_object))
             return HttpResponse(events, content_type="application/json")
@@ -69,15 +80,6 @@ class EventView(View):
         if event_id:
             event = serializers.serialize("json", Event.objects.filter(id=event_id))
             return HttpResponse(event, content_type="application/json")
-
-
-
-    def post(self, request):
-        print 'posting to event'
-        event_form = EventForm(request.POST)
-        new_event = serializers.serialize("json", [event_form.save()])
-        #TODO: crrate thank you page
-        return HttpResponse(new_event, content_type="application/json")
 
     def put(self, request, event_id):
         json_request = json.loads(request.body)['params']

@@ -15,7 +15,7 @@
 </style>
 
 
-<form action="/api/events/" method="post">
+<form action="/api/events/create/" method="post">
     {% csrf_token %}
     {{ form }}
     <br/>
@@ -31,7 +31,7 @@
 </script>
 
 <script>
-  window.parent.postMessage("{{ user.id }}", 'http://localhost:3000')
+  window.parent.postMessage("{{ token }}", "{{ client }}" )
 </script>
 
 {% endblock %}

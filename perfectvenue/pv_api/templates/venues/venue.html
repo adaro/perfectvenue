@@ -23,7 +23,7 @@
 </form>
 
 <script>
-  window.parent.postMessage("{{ user.id }}", 'http://localhost:3000')
+  window.parent.postMessage("{{ token }}", "{{ client }}" )
 </script>
 
 {% endblock %}

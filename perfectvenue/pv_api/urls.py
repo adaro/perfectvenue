@@ -14,7 +14,6 @@ urlpatterns = [
 
     url('venues/(?P<venue_id>\w+)/$', venues.VenueView.as_view(), name='venue'),
 
-
     url('spaces/$', spaces.SpaceView.as_view(), name='spaces'),
     url('spaces/(?P<space_id>\w+)/$', spaces.SpaceView.as_view(), name='space'),
 

@@ -10,6 +10,7 @@ import json
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
+
 class SignUpView(View):
     def get(self, request, *args, **kwargs):
         return render(request, 'registration/sign-up.html', *args, **kwargs)
@@ -17,9 +18,7 @@ class SignUpView(View):
 
 class LoginView(View):
     def get(self, request, *args, **kwargs):
-        print request.META['HTTP_REFERER']
         return render(request, 'registration/login.html', *args, **kwargs)
-
 
 class AuthView(View):
     def post(self, request):
@@ -34,7 +33,6 @@ class AuthView(View):
 
 class RedirectView(View):
     def get(self, request):
-        print self.request.GET.get('next')
         token, created = Token.objects.get_or_create(user=request.user)
         return redirect('{}?pvToken={}'.format(settings.HOSTS[settings.ENV]['client'], token.key))
 

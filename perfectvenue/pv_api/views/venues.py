@@ -4,6 +4,7 @@ from django.views.generic import CreateView, View
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.core import serializers
+from rest_framework.authtoken.models import Token
 from perfectvenue.forms import VenueCoordinatorSignUpForm
 from perfectvenue import settings
 from ..models import User, Venue
@@ -20,8 +21,7 @@ class CoordinatorSignUpView(CreateView):
     def form_valid(self, form):
         user = form.save()
         login(self.request, user)
-        # TODO: this will redirect to a frontend view
-        return redirect(settings.HOSTS[settings.ENV]['client'])
+        return redirect('/accounts/redirect/')
 
 
 class VenueView(View):
@@ -47,5 +47,11 @@ class CreatedVenueView(View):
 @method_decorator(login_required, name='dispatch')
 class AddVenue(View):
     form = VenueForm()
+
     def get(self, request):
-        return render(request, 'venues/venue.html', {"form": self.form})
+        token = Token.objects.get(user=request.user)
+        return render(request, 'venues/venue.html', {
+            "form": self.form,
+            "client": settings.HOSTS['PROD']['client'],
+            "token": token.key
+        })

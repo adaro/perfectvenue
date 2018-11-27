@@ -1,11 +1,10 @@
 {% block content %}
-  <form action="/accounts/login/"  method="post">
+  <form action=""  method="post">
     {% csrf_token %}
     {{ form.as_p }}
-    <input type="hidden" name="next" value="{{ next }}" />
     <button type="submit">Login</button>
   </form>
   <div id="register-link">
-    <span>Or </span><a href="/accounts/select/">Sign Up</a>
+    <span>Or </span><a href="/accounts/select/?next={{ request.REQUEST.next|urlencode }}">Sign Up</a>
   </div>
 {% endblock %}

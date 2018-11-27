@@ -79,7 +79,7 @@ class Event(models.Model):
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
     notes = models.TextField(blank=True, null=True)
-    status = models.CharField(choices=STATUSES, max_length=200, blank=True, null=True)
+    status = models.CharField(choices=STATUSES, max_length=200, blank=True, null=True, default='PN')
     coordinators = models.ManyToManyField(User) # event coords
 
     def get_spaces(self):
@@ -117,9 +117,11 @@ class Event(models.Model):
 
 
 @receiver(post_save, sender=Event, dispatch_uid="event_created")
-def send_notification(sender, instance, **kwargs):
-     print 'Sending Notification'
-     # syntax - notify.send(actor, recipient, verb, action_object, target, level, description, public, timestamp, **kwargs)
-     notify.send(instance, recipient=instance.venue.coordinators.all(), verb='Event was saved')
-
-
+def send_notification(sender, instance, created, **kwargs):
+    # syntax - notify.send(actor, recipient, verb, action_object, target, level, description, public, timestamp, **kwargs)
+    if created:
+        print 'Created Event. Sending Message to Venue Coordinator'
+        notify.send(instance, recipient=instance.venue.coordinators.all(), verb='Event was saved')
+    else:
+        print 'Updated Event. Sending Message to Event Coordinator'
+        notify.send(instance, recipient=instance.coordinators.all(), verb='Event was updated')
