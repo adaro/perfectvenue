@@ -1,4 +1,7 @@
 import React, { Component } from 'react';
+import {
+  Link
+} from 'react-router-dom'
 import { withStyles } from '@material-ui/core/styles';
 import EventCalendar from '../Components/EventCalendar'
 import RestClient from '../HTTP/RestClient';
@@ -11,7 +14,7 @@ import CheckIcon from '@material-ui/icons/Check';
 import CancelIcon from '@material-ui/icons/Cancel';
 
 
-const API = PerfectvenueGlobals.defaultProps.DEV;
+const API = PerfectvenueGlobals.defaultProps.PROD;
 
 const styles = theme => ({
   eventDetails: {
@@ -55,11 +58,26 @@ class Event extends Component {
 	}
 
 	componentDidMount = () => {
+		if (this.props.match.params.event_id) {
+			this.getEvent()
+		}
 		this.getEvents()
 	}
 
-	getEvents = () => {
+	getEvent = () => {
+    const getEventPromise = RestClient('GET', '/api/events/' + this.props.match.params.event_id)
+    const self = this;
+    getEventPromise.then(function(resp) {
+    	if (resp.length > 0) {
+    		self.setState({selectedEvent: resp[0]})
+    	}
+      else {
+      	alert('Could not find event.')
+      }
+    })
+	}
 
+	getEvents = () => {
     const getEventsPromise = RestClient('GET', '/api/events/?venue=' + this.props.match.params.id)
     const self = this;
     getEventsPromise.then(function(resp) {
@@ -72,7 +90,9 @@ class Event extends Component {
 	}
 
 	handleSelectEvent = (event) => {
-		console.log(event.fields.name)
+		// if deeplink - get event using ID
+		// set scrollToTime var from event date
+		window.history.pushState({}, document.title, "/venues/" + this.props.match.params.id + "/events/" + event.pk);
 		this.setState({selectedEvent: event})
 	}
 
@@ -90,7 +110,7 @@ class Event extends Component {
     return (
       <div className="flex">
 	      <div className="flex-item-75">
-	      	<EventCalendar eventsList={this.state.events} handleSelectSlot={this.handleSelectSlot} handleSelectEvent={this.handleSelectEvent}/>
+	      	<EventCalendar eventsList={this.state.events} selected={this.state.selectedEvent ? this.state.selectedEvent.fields : null} handleSelectSlot={this.handleSelectSlot} handleSelectEvent={this.handleSelectEvent}/>
 	      </div>
 	      <div className={"flex-item-25 " + classes.eventDetails}>
 	      	{ selectedEvent ?

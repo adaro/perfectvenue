@@ -24,7 +24,7 @@ import RestClient from '../HTTP/RestClient';
 const setSessionKey = PerfectvenueGlobals.defaultProps.setSessionKey;
 const getParam = PerfectvenueGlobals.defaultProps.getParam;
 
-const API = PerfectvenueGlobals.defaultProps.DEV;
+const API = PerfectvenueGlobals.defaultProps.PROD;
 
 const styles = {
   root: {
@@ -87,8 +87,9 @@ class MenuAppBar extends React.Component {
   }
 
   handleMessage = (event) => {
-      if (event.origin != "http://127.0.0.1:8000") { return; }
+      if (event.origin != API.host) { return; }
       if (event.data) {
+        console.log('Event Token', event.data)
         setSessionKey('pvToken', event.data)
         this.setState({auth: true})
       }

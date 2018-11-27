@@ -13,7 +13,7 @@ class PerfectvenueGlobals extends React.Component {
       },
       PROD: {
       	host: 'http://pv-env.z7uy3c3xvn.us-west-2.elasticbeanstalk.com',
-        client: 'https://app.perfetvenue.com'
+        client: 'http://perfectvenue.s3-website-us-west-2.amazonaws.com'
       },
       getParam: (name, url) => {
           if (!url) url = window.location.href;

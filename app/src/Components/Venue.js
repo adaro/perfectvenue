@@ -1,4 +1,7 @@
 import React, { Component } from 'react';
+import {
+  Link
+} from 'react-router-dom'
 import Calendar from 'react-calendar'
 import RestClient from '../HTTP/RestClient';
 import { withStyles } from '@material-ui/core/styles';
@@ -7,6 +10,9 @@ import Button from '@material-ui/core/Button';
 import CheckIcon from '@material-ui/icons/Check';
 import Iframe from 'react-iframe'
 import Modal from '@material-ui/core/Modal';
+
+import PerfectvenueGlobals from '../PerfectvenueGlobals'
+const API = PerfectvenueGlobals.defaultProps.PROD;
 
 const styles = theme => ({
   root: {
@@ -61,6 +67,9 @@ const styles = theme => ({
   calendar: {
     marginBottom: 20,
     position: 'relative',
+  },
+  viewEventsLink: {
+    paddingBottom: 100
   }
 })
 
@@ -121,8 +130,6 @@ class Venue extends Component {
 	}
 
 	requestBooking = () => {
-		console.log()
-		// http://127.0.0.1:8000/api/events/?venue=1&start_date=2018-12-19&end_date=2018-12-20
 		// show modal iframe
 		this.setState({open: true})
 	}
@@ -136,7 +143,7 @@ class Venue extends Component {
 	renderModalIframe = () => {
 		const { classes } = this.props;
 
-		const url = "http://127.0.0.1:8000/api/events/create/?venue=" + this.state.venueId +  "&start_date=" + this.state.startDate + "&end_date=" + this.state.endDate
+		const url = API.host +  "/api/events/create/?venue=" + this.state.venueId +  "&start_date=" + this.state.startDate + "&end_date=" + this.state.endDate
 		return (
 				<Modal
           aria-labelledby="simple-modal-title"
@@ -179,6 +186,7 @@ class Venue extends Component {
 				        <CheckIcon className={classes.extendedIcon} />
 				        Request to Book
 				      </Button>
+
 			        <Calendar
 			        	// tileDisabled={({activeStartDate, date, view }) => date.getDay() === 0}
 			          className={classes.calendar}
@@ -189,6 +197,12 @@ class Venue extends Component {
 			          onChange={this.onDateChange}
 			          value={this.state.date}
 			        />
+
+
+          <br/>
+          <Link className={classes.viewEventsLink} to={"/venues/" + this.props.match.params.id + "/events/"}>View All Events</Link>
+          <br/>
+
 	    			</div>
 	    		</div>
     		</div> ): null

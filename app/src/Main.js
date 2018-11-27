@@ -25,6 +25,7 @@ class Main extends Component {
            <Route exact path='/venues/new/add' component={(props) => <AddVenue {...props} open={true} />}/>
            <Route exact path='/venues/:id' component={Venue}/>
            <Route exact path='/venues/:id/events' component={Event}/>
+           <Route exact path='/venues/:id/events/:event_id' component={Event}/>
         </div>
       </Router>
     );

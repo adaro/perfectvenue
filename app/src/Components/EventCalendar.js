@@ -12,6 +12,20 @@ class EventCalendar extends Component {
 	   <div>
 	    <BigCalendar
 	      selectable
+				scrollToTime={this.props.scrollToTime}
+        // defaultDate={this.props.defaultDate}
+
+				eventPropGetter={event => {
+
+						if (this.props.selected && this.props.selected.name === event.fields.name) {
+							const backgroundColor = "#8247ff";
+							return { style: { backgroundColor } }
+						}
+
+					}
+				}
+
+        selected={this.props.selected}
 	    	events={this.props.eventsList}
 	      titleAccessor={(event) => { return event.fields.name }}
 	      startAccessor={(event) => { return moment(event.fields.start_date) }}

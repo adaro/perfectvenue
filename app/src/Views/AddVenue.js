@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Iframe from 'react-iframe'
 import Modal from '@material-ui/core/Modal';
-
+import PerfectvenueGlobals from '../PerfectvenueGlobals'
+const API = PerfectvenueGlobals.defaultProps.PROD;
 
 function getModalStyle() {
   const top = 50
@@ -57,7 +58,7 @@ class AddVenue extends Component {
           onClose={this.handleClose}
         >
           <div style={getModalStyle()} className={classes.paper}>
-          	<Iframe url="http://127.0.0.1:8000/api/venues/add/"
+          	<Iframe url={API.host + "/api/venues/add/"}
 			        width="100%"
 			        height="700px"
 			        id="myId"
