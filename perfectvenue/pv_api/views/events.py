@@ -39,11 +39,15 @@ class CreateEventView(View):
             end_date = request.GET.get('end_date')
             venue_object = Venue.objects.get(id=request.GET.get('venue'))
 
-            # TODO: this will require an approval process. The issue is we have spaces that might conflict  with this form
-            spaces = Space.objects.filter(venue=venue_object)
-            self.form.fields["spaces"].queryset = spaces
+            spaces = Space.get_spaces(venue_object, start_date, end_date)
+            space_ids = list(space['id'] for space in spaces['available'])
+            spaces_qs = Space.objects.filter(venue=venue_object, id__in=space_ids)
+
+            self.form.fields["spaces"].queryset = spaces_qs
             self.form.initial["start_date"] = start_date
             self.form.initial["end_date"] = end_date
+            self.form.initial["user"] = request.user.pk
+            self.form.initial["venue"] = venue_object
             self.form.fields["venue"].queryset = Venue.objects.filter(id=venue_object.id)
             self.form.initial['venue'] = Venue.objects.get(id=venue_object.id)
 
@@ -57,9 +61,13 @@ class CreateEventView(View):
     def post(self, request):
         print 'posting to event'
         event_form = EventForm(request.POST)
-        new_event = serializers.serialize("json", [event_form.save()])
+        obj = event_form.save(commit=False)
+        obj.user = request.user
+        obj.save()
+        event_form.save_m2m()
+
         #TODO: crrate thank you page
-        return HttpResponse(new_event, content_type="application/json")
+        return HttpResponse("Created Event {}".format(obj.name), content_type="application/json")
 
 
 # TODO: we need a custom domain in order to use Token based auth (or so i think). When ready turn this back on and test

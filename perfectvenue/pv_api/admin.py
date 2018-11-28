@@ -18,7 +18,7 @@ class SpaceAdmin(admin.ModelAdmin):
 
 
 class EventAdmin(admin.ModelAdmin):
-    pass
+    filter_horizontal = ('spaces', 'coordinators')
 
 
 admin.site.register(User, UserAdmin)

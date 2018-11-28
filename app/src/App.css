@@ -35,6 +35,10 @@
   margin: 0 auto;
 }
 
+.margin-100 {
+  margin-left: 100px;
+}
+
 .flex {
   display: flex;
   flex-direction: row;
@@ -43,6 +47,10 @@
 
 .flex-item-25 {
   width: 25%;
+}
+
+.flex-item-33 {
+  width: 33%;
 }
 
 .flex-item-50 {

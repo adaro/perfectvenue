@@ -57,7 +57,6 @@ const styles = {
   },
   linkContainer: {
     color: 'white',
-    marginTop: 15
   }
 };
 
@@ -82,8 +81,20 @@ class MenuAppBar extends React.Component {
     const getAuthPromise = RestClient('POST', '/accounts/auth/', {pvToken: localStorage.getItem('pvToken')})
     const self = this;
     getAuthPromise.then(function(resp) {
-      self.setState({auth: resp.loggedIn})
+      self.setState({auth: resp.loggedIn, pvUserId: resp.userId}, function(resp) {
+        self.getMessages()
+      })
     })
+  }
+
+  getMessages = () => {
+    if (this.state.pvUserId ) {
+      const getMessagesPromise = RestClient('GET', '/api/notifications/' + this.state.pvUserId + '/unread')
+      getMessagesPromise.then(function(resp) {
+        console.log(resp)
+      })
+    }
+
   }
 
   handleMessage = (event) => {
@@ -131,13 +142,15 @@ class MenuAppBar extends React.Component {
           <AppBar position="static">
             <Toolbar>
               <Link to="/"><img className="logo" src={"https://via.placeholder.com/50"}/></Link>
-              <Typography color="inherit" className={classes.flex}>
+              <Typography color="inherit">
                 {this.props.title}
-                <VenueSearch searchVenue={this.searchVenue} suggestions={this.state.suggestions}/>
               </Typography>
 
+              <VenueSearch searchVenue={this.searchVenue} suggestions={this.state.suggestions}/>
 
-            <div className={classes.container}>
+
+            <div className={classes.container + " header-link-container"}>
+
               <div className={classes.linkContainer}>
                 <Link className={classes.link} to="/venues/new/add">Add Venue</Link>
               </div>
@@ -148,7 +161,7 @@ class MenuAppBar extends React.Component {
                   | <a className={classes.link} onClick={this.logout}>Logout</a>
                 </div>
 
-              )}
+              ) }
 
               {!auth && (
 
@@ -158,8 +171,36 @@ class MenuAppBar extends React.Component {
 
               )}
 
-
               </div>
+
+              <IconButton
+                    className={classes.accountIcon}
+                    aria-owns={open ? 'menu-appbar' : null}
+                    aria-haspopup="true"
+                    onClick={this.handleMenu}
+                    color="inherit"
+                  >
+                    <AccountCircle />
+                  </IconButton>
+                  <Menu
+                    id="menu-appbar"
+                    anchorEl={anchorEl}
+                    anchorOrigin={{
+                      vertical: 'top',
+                      horizontal: 'right',
+                    }}
+                    transformOrigin={{
+                      vertical: 'top',
+                      horizontal: 'right',
+                    }}
+                    open={open}
+                    onClose={this.handleClose}
+                  >
+                    <Link to="/" className={classes.menuLink}><MenuItem onClick={this.handleClose}>Account</MenuItem></Link>
+                    <Link to="/notifications" className={classes.menuLink} ><MenuItem onClick={this.handleClose}>Messages</MenuItem></Link>
+                    <Link className={classes.link} to="/venues/new/add"><MenuItem onClick={this.handleClose}>Add Venue</MenuItem></Link>
+                  </Menu>
+
             </Toolbar>
           </AppBar>
         </div>

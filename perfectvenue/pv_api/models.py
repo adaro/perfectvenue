@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from django.db.utils import IntegrityError
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.core import serializers
 from django.db.models.signals import post_save
-from django.db.models.signals import m2m_changed
+from django.forms.models import model_to_dict
 
 from django.dispatch import receiver
-from django.shortcuts import get_object_or_404
 
 from notifications.signals import notify
 
@@ -37,10 +34,7 @@ class Space(models.Model):
     venue = models.ForeignKey(Venue, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
 
-    # TODO: this method should be checking to see if there is an event with this space for a given date
-    # TODO: query event by start and end date
-    # TODO: if queried event has space, return as "booked" else return as "available"
-
+    # TODO: Optimize this call
     @classmethod
     def get_spaces(cls, venue_object, start_date, end_date):
         events = Event.objects.filter(venue=venue_object, start_date__gte=start_date, end_date__lte=end_date)
@@ -48,10 +42,15 @@ class Space(models.Model):
         if events.exists():
             for event in events:
                 all_booked = bool(set(event.spaces.all()) == set(Space.objects.filter(venue=venue_object)))
+                available_set = list(set(Space.objects.filter(venue=venue_object)) - set(event.spaces.all()))
+                available = []
+                for i in available_set:
+                    available.append(model_to_dict(i))
                 space = {
                     'event': event.id,
-                    'booked': list(event.spaces.all().values()), 'available': [],
-                    'all_booked': all_booked
+                    'booked': list(event.spaces.all().values()),
+                    'available': available,
+                    'all_booked': all_booked,
                  }
                 spaces.append(space)
         else:
@@ -59,8 +58,21 @@ class Space(models.Model):
             space = {'event': None, 'booked': [], 'available': list(spaces_object.values()), 'all_booked': False}
             spaces.append(space)
 
-        print 'GOT OUR SPACES.....', spaces
-        return spaces
+        booked_spaces = []
+        available_spaces = []
+        for space in spaces:
+            for book in space['booked']:
+                if book not in booked_spaces:
+                    booked_spaces.append(book)
+            booked_spaces_ids = [int(i['id']) for i in booked_spaces]
+        for space in spaces:
+            for avail in space['available']:
+                if avail not in available_spaces and avail['id'] not in booked_spaces_ids:
+                    available_spaces.append(avail)
+
+        return {"booked": booked_spaces, "available": available_spaces}
+
+
 
     def __str__(self):
         return "{} - {}".format(self.venue.name, self.name)
@@ -73,6 +85,7 @@ class Event(models.Model):
         ('DC', 'DECLINED'),
         ('CN', 'CANCELED'),
     )
+    user = models.ForeignKey(User, on_delete=models.CASCADE) # user who created the event
     name = models.CharField(max_length=200)
     venue = models.ForeignKey(Venue, on_delete=models.CASCADE)
     spaces = models.ManyToManyField(Space)
@@ -80,7 +93,7 @@ class Event(models.Model):
     end_date = models.DateTimeField()
     notes = models.TextField(blank=True, null=True)
     status = models.CharField(choices=STATUSES, max_length=200, blank=True, null=True, default='PN')
-    coordinators = models.ManyToManyField(User) # event coords
+    coordinators = models.ManyToManyField(User, related_name='event_coordinators') # event coords
 
     def get_spaces(self):
         return self.spaces
@@ -120,8 +133,8 @@ class Event(models.Model):
 def send_notification(sender, instance, created, **kwargs):
     # syntax - notify.send(actor, recipient, verb, action_object, target, level, description, public, timestamp, **kwargs)
     if created:
-        print 'Created Event. Sending Message to Venue Coordinator'
-        notify.send(instance, recipient=instance.venue.coordinators.all(), verb='Event was saved')
+        print 'Created Event. Sending Message to Event Coordinator'
+        notify.send(instance, recipient=instance.venue.coordinators.all(), verb='{} requested a booking'.format(instance.user.username))
     else:
         print 'Updated Event. Sending Message to Event Coordinator'
-        notify.send(instance, recipient=instance.coordinators.all(), verb='Event was updated')
+        notify.send(instance, recipient=instance.coordinators.all(), verb='{} updated a booking'.format(instance.user.username))

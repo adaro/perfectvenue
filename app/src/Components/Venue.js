@@ -29,7 +29,6 @@ const styles = theme => ({
   },
   flex: {
   	display: 'flex',
-  	width: '95%'
   },
   venueName: {
     textAlign: 'left',
@@ -39,7 +38,7 @@ const styles = theme => ({
   },
   venueDescritpion: {
   	textAlign: 'left',
-  	width: '50%',
+  	width: '80%',
   	marginLeft: 55
   },
   backIcon: {
@@ -70,6 +69,23 @@ const styles = theme => ({
   },
   viewEventsLink: {
     paddingBottom: 100
+  },
+  spaceContainer: {
+    border: "solid 1px #464649",
+    padding: 16,
+    textAlign: 'left',
+    margin: 20,
+  },
+  bookedStyle: {
+    color: 'grey'
+  },
+  availableDetail: {
+    color: 'green',
+    fontSize: 10
+  },
+  bookedDetail: {
+    color: 'red',
+    fontSize: 10
   }
 })
 
@@ -93,21 +109,23 @@ class Venue extends Component {
 		startDate: null,
 		endDate: null,
 		open: false,
-		spaces: []
+		spaces: [{'available': null}]
 	}
 
 
 	componentDidMount = () => {
-		console.log(this.props.match.params.id)
-
     const getVenuePromise = RestClient('GET', '/api/venues/' + this.props.match.params.id)
     const self = this;
     getVenuePromise.then(function(resp) {
       self.setState({venueId:resp[0].pk, venue: resp[0].fields, loading: false})
     })
 
-	}
+    // const getSpacesPromise = RestClient('GET', '/api/spaces/?venue=' + this.props.match.params.id)
+    // getSpacesPromise.then(function(resp) {
+    //   self.setState({spaces:resp})
+    // })
 
+	}
 
 
 	goBack = () => {
@@ -123,7 +141,7 @@ class Venue extends Component {
     const getSpacesPromise = RestClient('GET', url)
     const self = this;
     getSpacesPromise.then(function(resp) {
-    	console.log(resp)
+      console.log(resp)
       self.setState({spaces: resp, startDate: value[0].toISOString().split('T')[0], endDate: value[1].toISOString().split('T')[0]})
     })
 
@@ -154,7 +172,7 @@ class Venue extends Component {
           <div style={getModalStyle()} className={classes.paper}>
           	<Iframe url={url}
 			        width="100%"
-			        height="550px"
+			        height="435px"
 			        id="myId"
 			        className="myClassname"
 			        display="initial"
@@ -170,40 +188,73 @@ class Venue extends Component {
   render() {
 
   	const { classes } = this.props
-  	const { loading } = this.state
+  	const { loading, spaces } = this.state
     return (
     	<div className={classes.root}>
-    		<BackIcon className={classes.backIcon} onClick={this.goBack}/>
-    		<img src={'https://via.placeholder.com/1200x300'}/>
 
     		{!loading ? (
     		<div classes={classes.venueContainer}>
-	    		<div className={classes.flex}>
-	    		  <div><h2 className={classes.venueName}>{this.state.venue.name}</h2>
-	    			<p className={classes.venueDescritpion}>{this.state.venue.description}</p></div>
-	    			<div classes={classes.bookingContainer}>
-				      <Button disabled={this.state.startDate == null} variant="contained" color="primary" aria-label="Request to Book" className={classes.button} onClick={this.requestBooking}>
-				        <CheckIcon className={classes.extendedIcon} />
-				        Request to Book
-				      </Button>
 
-			        <Calendar
-			        	// tileDisabled={({activeStartDate, date, view }) => date.getDay() === 0}
-			          className={classes.calendar}
-			          tileDisabled={
-			          	({activeStartDate, date, view }) => date < new Date()
-			          }
-			          selectRange={true}
-			          onChange={this.onDateChange}
-			          value={this.state.date}
-			        />
+        <BackIcon className={classes.backIcon} onClick={this.goBack}/>
+        <img src={'https://via.placeholder.com/1200x300'}/>
+
+	    		<div className="flex">
+
+	    		  <div className="flex-item-33">
+              <h2 className={classes.venueName}>{this.state.venue.name}</h2>
+              <p className={classes.venueDescritpion}>{this.state.venue.address}</p>
 
 
-          <br/>
-          <Link className={classes.viewEventsLink} to={"/venues/" + this.props.match.params.id + "/events/"}>View All Events</Link>
-          <br/>
+	    			  <p className={classes.venueDescritpion}>{this.state.venue.description}</p>
+            </div>
 
-	    			</div>
+
+            <div classes={classes.bookingContainer + " flex-item-33"}>
+              <Button disabled={this.state.startDate == null} variant="contained" color="primary" aria-label="Request to Book" className={classes.button} onClick={this.requestBooking}>
+                <CheckIcon className={classes.extendedIcon} />
+                Request to Book
+              </Button>
+              <Calendar
+                // tileDisabled={({activeStartDate, date, view }) => date.getDay() === 0}
+                className={classes.calendar}
+                tileDisabled={
+                  ({activeStartDate, date, view }) => date < new Date()
+                }
+                selectRange={true}
+                onChange={this.onDateChange}
+                value={this.state.date}
+              />
+
+              <br/>
+              <Link className={classes.viewEventsLink} to={"/venues/" + this.props.match.params.id + "/events/"}>View All Events</Link>
+              <br/>
+            </div>
+
+            <div className={classes.spaceContainer + " flex-item-33"}>
+              <h2>Spaces</h2>
+              {spaces.available ? (spaces.available.map(function(space, index) {
+                return (
+
+                  <div >
+                    <h4>{space.name} <span className={classes.availableDetail}>AVAILABLE</span> </h4>
+
+                  </div>
+                  )
+              },
+              )): "Select a date to view available spaces"}
+
+
+              {spaces.booked ? spaces.booked.map(function(space, index) {
+                return (
+
+                  <div >
+                    <h4 className={classes.bookedStyle}>{space.name} <span className={classes.bookedDetail}>BOOKED</span></h4>
+
+                  </div>
+                  )
+              }) : ""}
+
+            </div>
 	    		</div>
     		</div> ): null
     	}

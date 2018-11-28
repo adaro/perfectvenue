@@ -33,6 +33,9 @@ class VenueView(View):
             venue = serializers.serialize("json", Venue.objects.filter(id=venue_id))
             return HttpResponse(venue, content_type="application/json")
 
+        venues = serializers.serialize("json", Venue.objects.all())
+        return HttpResponse(venues, content_type="application/json")
+
     def post(self, request):
         venue_form = VenueForm(request.POST)
         venue_saved = venue_form.save()

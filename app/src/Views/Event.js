@@ -97,11 +97,26 @@ class Event extends Component {
 	}
 
 	updateStatus = (status) => {
-		console.log(status)
+		var self = this;
 		const putEventStatusPromise = RestClient('PUT', '/api/events/' + this.state.selectedEvent.pk + "/",  {"status": status})
 		putEventStatusPromise.then(function(resp) {
-			console.log(resp)
+			self.getEvent()
 		})
+	}
+
+	renderStatus() {
+
+		switch(this.state.selectedEvent.fields.status) {
+			case "PN":
+					return (<b>PENDING</b>)
+			case "AP":
+					return (<b>APPROVED</b>)
+			case "DC":
+					return (<b>DECLINED</b>)
+			case "CN":
+					return (<b>CANCELLED</b>)
+		}
+
 	}
 
   render() {
@@ -116,7 +131,7 @@ class Event extends Component {
 	      	{ selectedEvent ?
 	      		<div>
 		      		<h2>{this.state.selectedEvent.fields.name}</h2>
-		      		<div>Status: {this.state.selectedEvent.fields.status == 'PN' ? <b>PENDING</b> : this.state.selectedEvent.fields.status}</div>
+		      		<div>Status: {this.renderStatus()}</div>
 		      		<p className={classes.eventRequestNotes}>{this.state.selectedEvent.fields.notes}</p>
 
 		      		<div className={classes.dateContainer}>

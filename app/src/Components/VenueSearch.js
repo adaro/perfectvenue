@@ -89,7 +89,7 @@ const styles = theme => ({
   root: {
     flexGrow: 1,
     height: 50,
-    width: 275,
+    width: '70%',
     marginLeft: 20,
     marginRight: 20,
 		top: 10,
