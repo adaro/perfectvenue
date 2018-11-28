@@ -10,6 +10,7 @@ import Button from '@material-ui/core/Button';
 import CheckIcon from '@material-ui/icons/Check';
 import Iframe from 'react-iframe'
 import Modal from '@material-ui/core/Modal';
+import CheckboxList from './List'
 
 import PerfectvenueGlobals from '../PerfectvenueGlobals'
 const API = PerfectvenueGlobals.defaultProps.PROD;
@@ -51,7 +52,8 @@ const styles = theme => ({
   bookingContainer: {
   	marginRight: '5%',
   	display: 'flex',
-  	flexDirection: 'column'
+  	flexDirection: 'column',
+
   },
   button: {
   	marginTop: 20,
@@ -64,7 +66,7 @@ const styles = theme => ({
     marginRight: theme.spacing.unit,
   },
   calendar: {
-    marginBottom: 20,
+    marginTop: 20,
     position: 'relative',
   },
   viewEventsLink: {
@@ -109,7 +111,8 @@ class Venue extends Component {
 		startDate: null,
 		endDate: null,
 		open: false,
-		spaces: [{'available': null}]
+		spaces: [{'available': null}],
+    showStatus: false // REMOVE - ONLY FOR DEMO PURPOSE
 	}
 
 
@@ -120,6 +123,8 @@ class Venue extends Component {
       self.setState({venueId:resp[0].pk, venue: resp[0].fields, loading: false})
     })
 
+     window.addEventListener('message', this.handleMessage, false);
+
     // const getSpacesPromise = RestClient('GET', '/api/spaces/?venue=' + this.props.match.params.id)
     // getSpacesPromise.then(function(resp) {
     //   self.setState({spaces:resp})
@@ -127,6 +132,16 @@ class Venue extends Component {
 
 	}
 
+
+  handleMessage = (event) => {
+      if (event.origin != API.host) { return; }
+      if (event.data && event.data == 'success-event') {
+        console.log('Closing Iframe', event.data)
+        this.setState({showStatus: true}, function() {
+          this.handleClose()
+        })
+      }
+  }
 
 	goBack = () => {
 		window.history.back();
@@ -210,10 +225,6 @@ class Venue extends Component {
 
 
             <div classes={classes.bookingContainer + " flex-item-33"}>
-              <Button disabled={this.state.startDate == null} variant="contained" color="primary" aria-label="Request to Book" className={classes.button} onClick={this.requestBooking}>
-                <CheckIcon className={classes.extendedIcon} />
-                Request to Book
-              </Button>
               <Calendar
                 // tileDisabled={({activeStartDate, date, view }) => date.getDay() === 0}
                 className={classes.calendar}
@@ -231,28 +242,28 @@ class Venue extends Component {
             </div>
 
             <div className={classes.spaceContainer + " flex-item-33"}>
-              <h2>Spaces</h2>
-              {spaces.available ? (spaces.available.map(function(space, index) {
-                return (
 
-                  <div >
-                    <h4>{space.name} <span className={classes.availableDetail}>AVAILABLE</span> </h4>
 
+              {this.state.showStatus ? (
+                  <div>
+                    Booking Status: <b>PENDING</b>
+                  <hr/>
                   </div>
-                  )
-              },
-              )): "Select a date to view available spaces"}
+                ): null}
+
+              {spaces.available || spaces.booked ? (
+              <div className="align-center">
+                <h2>Spaces</h2>
+                <CheckboxList data={spaces.available} status="AVAILABLE"/>
+                <CheckboxList data={spaces.booked} status="BOOKED"/>
+                <Button disabled={this.state.startDate == null} variant="contained" color="primary" aria-label="Request to Book" className={classes.button} onClick={this.requestBooking}>
+                  <CheckIcon className={classes.extendedIcon} />
+                  Request to Book
+                </Button>
+              </div>
+              ): null }
 
 
-              {spaces.booked ? spaces.booked.map(function(space, index) {
-                return (
-
-                  <div >
-                    <h4 className={classes.bookedStyle}>{space.name} <span className={classes.bookedDetail}>BOOKED</span></h4>
-
-                  </div>
-                  )
-              }) : ""}
 
             </div>
 	    		</div>

@@ -9,6 +9,7 @@ urlpatterns = [
 
     url('venues/$', venues.VenueView.as_view(), name='venues'),
     url('venues/(?P<venue_id>\w+)/created/$', csrf_exempt(venues.CreatedVenueView.as_view()), name='venues.created'),
+    url('events/(?P<event_id>\w+)/created/$', csrf_exempt(events.CreatedEventView.as_view()), name='venues.created'),
     url('venues/add/$', venues.AddVenue.as_view(), name='venues.add'),
     url('venues/(?P<venue_id>\w+)/$', venues.VenueView.as_view(), name='venue'),
 

@@ -99,8 +99,7 @@ class MenuAppBar extends React.Component {
 
   handleMessage = (event) => {
       if (event.origin != API.host) { return; }
-      if (event.data) {
-        console.log('Event Token', event.data)
+      if (event.data && event.data !== 'success-venue' || event.data !== ' success-event') {
         setSessionKey('pvToken', event.data)
         this.setState({auth: true})
       }

@@ -45,7 +45,9 @@ class VenueView(View):
 class CreatedVenueView(View):
     def get(self, request, venue_id=None):
         venue = Venue.objects.get(id=venue_id)
-        return render(request, 'venues/created.html', context={'venue': venue})
+        return render(request, 'venues/created.html', context={'venue': venue,
+                                                               "client": settings.HOSTS['PROD']['client'],
+                                                               })
 
 @method_decorator(login_required, name='dispatch')
 class AddVenue(View):

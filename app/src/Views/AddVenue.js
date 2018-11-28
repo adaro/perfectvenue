@@ -1,5 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { withRouter } from 'react-router-dom'
+import { browserHistory } from 'react-router'
+
+
 import { withStyles } from '@material-ui/core/styles';
 import Iframe from 'react-iframe'
 import Modal from '@material-ui/core/Modal';
@@ -29,9 +33,21 @@ const styles = theme => ({
 
 class AddVenue extends Component {
 
-	componentWillReceiveProps() {
+  componentDidMount = () => {
+    window.addEventListener('message', this.handleMessage, false);
+  }
+
+	componentWillReceiveProps = () => {
 		this.setState({open: this.props.open})
 	}
+
+  handleMessage = (event) => {
+      if (event.origin != API.host) { return; }
+      if (event.data && event.data == 'success-venue') {
+        console.log('Closing Iframe', event.data)
+        this.props.history.push('/') // THIS WILL PROBABLY END UP GOING TO A VENUE VIEW OF SOME SORT
+      }
+  }
 
   state = {
     open: this.props.open ? this.props.open : false,
@@ -41,7 +57,10 @@ class AddVenue extends Component {
     this.setState({ open: true });
   };
 
+
+
   handleClose = () => {
+    this.props.history.goBack()
     this.setState({ open: false });
   };
 

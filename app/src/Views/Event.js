@@ -92,6 +92,7 @@ class Event extends Component {
 	handleSelectEvent = (event) => {
 		// if deeplink - get event using ID
 		// set scrollToTime var from event date
+		// TODO: change this for props.history
 		window.history.pushState({}, document.title, "/venues/" + this.props.match.params.id + "/events/" + event.pk);
 		this.setState({selectedEvent: event})
 	}

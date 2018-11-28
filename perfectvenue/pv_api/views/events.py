@@ -66,9 +66,12 @@ class CreateEventView(View):
         obj.save()
         event_form.save_m2m()
 
-        #TODO: crrate thank you page
-        return HttpResponse("Created Event {}".format(obj.name), content_type="application/json")
+        return redirect("{}{}{}".format("/api/events/", obj.id, "/created"))
 
+
+class CreatedEventView(View):
+    def get(self, request, event_id=None):
+        return render(request, 'events/created.html', context={"client": settings.HOSTS['PROD']['client']})
 
 # TODO: we need a custom domain in order to use Token based auth (or so i think). When ready turn this back on and test
 # TODO: it works locally just fine and that's how i can be sure it's the SSL/HTTPS on AWS
