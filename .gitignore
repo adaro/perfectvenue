@@ -13,6 +13,7 @@ venv/
 perfectvenue/perfectvenue/static/django_extensions
 perfectvenue/perfectvenue/static/admin
 app/node_modules
+static/
 
 # Specific files #
 ##################
