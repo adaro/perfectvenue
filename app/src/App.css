@@ -1,3 +1,17 @@
+a:hover, a:visited, a:link, a:active
+{
+    text-decoration: none;
+}
+
+::-webkit-scrollbar {
+    width: 0px;  /* remove scrollbar space */
+    background: transparent;  /* optional: just make scrollbar invisible */
+}
+/* optional: show position indicator in red */
+::-webkit-scrollbar-thumb {
+    background: #FF0000;
+}
+
 .App {
   text-align: center;
 }
@@ -77,4 +91,8 @@
   margin-left: 20px;
   min-height: 500px;
   margin-top: 20px;
+}
+
+.slick-slide img {
+    display: inherit;
 }

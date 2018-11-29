@@ -11,6 +11,7 @@ import CheckIcon from '@material-ui/icons/Check';
 import Iframe from 'react-iframe'
 import Modal from '@material-ui/core/Modal';
 import CheckboxList from './List'
+import VenueCarousel from './Carousel'
 
 import PerfectvenueGlobals from '../PerfectvenueGlobals'
 const API = PerfectvenueGlobals.defaultProps.PROD;
@@ -33,7 +34,7 @@ const styles = theme => ({
   },
   venueName: {
     textAlign: 'left',
-    width: '50%',
+    width: '60%',
 		color: '#464649',
 		marginLeft: 55
   },
@@ -88,6 +89,9 @@ const styles = theme => ({
   bookedDetail: {
     color: 'red',
     fontSize: 10
+  },
+  carousel: {
+    margin: '0 auto'
   }
 })
 
@@ -112,7 +116,10 @@ class Venue extends Component {
 		endDate: null,
 		open: false,
 		spaces: [{'available': null}],
-    showStatus: false // REMOVE - ONLY FOR DEMO PURPOSE
+    images: [],
+    showStatus: false, // REMOVE - ONLY FOR DEMO PURPOSE
+    selectedSpace: null,
+    selectedIndex: 0,
 	}
 
 
@@ -120,17 +127,35 @@ class Venue extends Component {
     const getVenuePromise = RestClient('GET', '/api/venues/' + this.props.match.params.id)
     const self = this;
     getVenuePromise.then(function(resp) {
-      self.setState({venueId:resp[0].pk, venue: resp[0].fields, loading: false})
+      self.setState({
+        venueId:resp[0].pk,
+        venue: resp[0].fields,
+        loading: false,
+        images: [{
+          image_src: resp[0].fields.photo,
+          legend: resp[0].fields.name
+        }]
+      }, function(resp) {
+        this.setSpaceImages()
+      })
     })
-
      window.addEventListener('message', this.handleMessage, false);
-
-    // const getSpacesPromise = RestClient('GET', '/api/spaces/?venue=' + this.props.match.params.id)
-    // getSpacesPromise.then(function(resp) {
-    //   self.setState({spaces:resp})
-    // })
-
 	}
+
+  setSpaceImages = () => {
+    const self = this;
+    const getSpacesPromise = RestClient('GET', '/api/spaces/?venue=' + this.props.match.params.id)
+    getSpacesPromise.then(function(resp) {
+      var stateArray = self.state.images.slice();
+      resp.filter(function(space) {
+        stateArray.push({
+          image_src: space.fields.photo,
+          legend: space.fields.name
+        })
+      })
+      self.setState({images:stateArray})
+    })
+  }
 
 
   handleMessage = (event) => {
@@ -156,7 +181,6 @@ class Venue extends Component {
     const getSpacesPromise = RestClient('GET', url)
     const self = this;
     getSpacesPromise.then(function(resp) {
-      console.log(resp)
       self.setState({spaces: resp, startDate: value[0].toISOString().split('T')[0], endDate: value[1].toISOString().split('T')[0]})
     })
 
@@ -175,7 +199,6 @@ class Venue extends Component {
   // TODO: this should be in a seperate AddEvent.js compoenent
 	renderModalIframe = () => {
 		const { classes } = this.props;
-
 		const url = API.host +  "/api/events/create/?venue=" + this.state.venueId +  "&start_date=" + this.state.startDate + "&end_date=" + this.state.endDate
 		return (
 				<Modal
@@ -199,9 +222,14 @@ class Venue extends Component {
 
 	}
 
+  setSelectedSpace = (space, index) => {
+    console.log(index, 'index!')
+    this.setState({selectedSpace: space, selectedIndex: index})
+  }
+
 
   render() {
-
+    // <img src={'https://via.placeholder.com/1200x300'}/>
   	const { classes } = this.props
   	const { loading, spaces } = this.state
     return (
@@ -211,7 +239,8 @@ class Venue extends Component {
     		<div classes={classes.venueContainer}>
 
         <BackIcon className={classes.backIcon} onClick={this.goBack}/>
-        <img src={'https://via.placeholder.com/1200x300'}/>
+
+        <VenueCarousel images={this.state.images} selectedElement={this.state.selectedIndex} className={classes.carousel}/>
 
 	    		<div className="flex">
 
@@ -254,16 +283,14 @@ class Venue extends Component {
               {spaces.available || spaces.booked ? (
               <div className="align-center">
                 <h2>Spaces</h2>
-                <CheckboxList data={spaces.available} status="AVAILABLE"/>
-                <CheckboxList data={spaces.booked} status="BOOKED"/>
+                <CheckboxList data={spaces.available} setSelectedSpace={this.setSelectedSpace} status="AVAILABLE"/>
+                <CheckboxList data={spaces.booked} setSelectedSpace={this.setSelectedSpace} status="BOOKED"/>
                 <Button disabled={this.state.startDate == null} variant="contained" color="primary" aria-label="Request to Book" className={classes.button} onClick={this.requestBooking}>
                   <CheckIcon className={classes.extendedIcon} />
                   Request to Book
                 </Button>
               </div>
-              ): null }
-
-
+              ): <h3 style={{textAlign: 'center'}}>Select a date to start planning your event.</h3> }
 
             </div>
 	    		</div>

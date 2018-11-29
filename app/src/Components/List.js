@@ -40,33 +40,34 @@ class CheckboxList extends React.Component {
   //   disableRipple={true}
   //   disabled={status == "BOOKED"}
   // />
-  handleToggle = (value, status) => () => {
-    const { checked } = this.state;
-    const currentIndex = checked.indexOf(value);
-    const newChecked = [...checked];
 
-    if (status === 'BOOKED') {return;}
+  // handleToggle = (value, status) => () => {
+  //   const { checked } = this.state;
+  //   const currentIndex = checked.indexOf(value);
+  //   const newChecked = [...checked];
 
-    if (currentIndex === -1) {
-      newChecked.push(value);
-    } else {
-      newChecked.splice(currentIndex, 1);
-    }
+  //   if (status === 'BOOKED') {return;}
 
-    this.setState({
-      checked: newChecked,
-    });
-  };
+  //   if (currentIndex === -1) {
+  //     newChecked.push(value);
+  //   } else {
+  //     newChecked.splice(currentIndex, 1);
+  //   }
+
+  //   this.setState({
+  //     checked: newChecked,
+  //   });
+  // };
 
   render() {
-    const { classes, data, status } = this.props;
+    const { classes, data, status, setSelectedSpace } = this.props;
 
     return (
       <List className={classes.root}>
-        {data.map(value => (
-          <ListItem key={value} role={undefined} dense button onClick={this.handleToggle(value, status)}>
+        {data.map((value, index) => (
+          <ListItem key={value.name} role={undefined} dense button onClick={setSelectedSpace.bind(this, value, index + 1)}>
            <ListItemAvatar>
-              <Avatar alt="S" src="https://placeimg.com/640/480/arch" />
+              <Avatar alt="S" src={value.photo} />
             </ListItemAvatar>
 
             <ListItemText primary={`${value.name}`} secondary={<Typography type="span" className={classes[status]}>{status}</Typography>} />

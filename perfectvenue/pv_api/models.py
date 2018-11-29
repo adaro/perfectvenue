@@ -9,7 +9,7 @@ from django.forms.models import model_to_dict
 from django.dispatch import receiver
 
 from notifications.signals import notify
-
+import pprint
 
 class User(AbstractUser):
     is_event_coordinator = models.BooleanField('event coordinator status', default=False)
@@ -23,6 +23,7 @@ class Venue(models.Model):
     occupancy = models.IntegerField(blank=True, null=True)
     parking_notes = models.TextField(blank=True, null=True)
     logo = models.URLField(blank=True, null=True)
+    photo = models.URLField(blank=True, null=True)
     coordinators = models.ManyToManyField(User)  # venue coords
 
     def __str__(self):
@@ -33,6 +34,8 @@ class Space(models.Model):
 
     venue = models.ForeignKey(Venue, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
+    description = models.TextField()
+    photo = models.URLField(blank=True, null=True)
 
     # TODO: Optimize this call
     @classmethod
@@ -70,6 +73,7 @@ class Space(models.Model):
                 if avail not in available_spaces and avail['id'] not in booked_spaces_ids:
                     available_spaces.append(avail)
 
+        print pprint.pprint( {"booked": booked_spaces, "available": available_spaces})
         return {"booked": booked_spaces, "available": available_spaces}
 
 

@@ -15,11 +15,16 @@ import Typography from '@material-ui/core/Typography';
 const styles = {
   card: {
     maxWidth: 345,
-    margin: 20
+    maxHeight: 345,
+    margin: 20,
+    marginBottom: 20,
   },
   details: {
+     textDecoration: null,
      maxHeight: 200,
-     overflow: 'hidden'
+     overflow: 'scroll',
+     overflowX: 'hidden',
+     marginBottom: 20
   },
   media: {
     height: 140,
@@ -30,6 +35,7 @@ class MediaCard extends Component {
   render() {
     const { classes } = this.props;
     return (
+     <Link to={this.props.actionRoute}>
       <Card className={classes.card}>
         <CardActionArea>
           <CardMedia
@@ -46,14 +52,8 @@ class MediaCard extends Component {
             </Typography>
           </CardContent>
         </CardActionArea>
-        <CardActions>
-          <Link to={this.props.actionRoute}>
-            <Button size="small" color="primary">
-              View
-            </Button>
-          </Link>
-        </CardActions>
       </Card>
+      </Link>
     );
   }
 }
