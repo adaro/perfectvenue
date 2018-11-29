@@ -7,6 +7,7 @@ from perfectvenue.forms import EventCoordinatorSignUpForm
 from perfectvenue import settings
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin import widgets
 
 from rest_framework.decorators import api_view
 

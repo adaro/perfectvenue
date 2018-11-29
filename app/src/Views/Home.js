@@ -23,7 +23,7 @@ class Home extends Component {
 	renderCards() {
 		if (this.state.venues) {
 			return (
-				<div className="flex margin-100">
+				<div className="flex-wrap margin-100">
 					{this.state.venues.map(function(venue) {
 						return (<MediaCard media={venue.fields.logo} title={venue.fields.name} details={venue.fields.description} actionRoute={"/venues/" + venue.pk}/>)
 					})}

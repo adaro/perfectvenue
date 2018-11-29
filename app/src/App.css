@@ -63,6 +63,12 @@ a:hover, a:visited, a:link, a:active
   /* TODO: add media queris for modbile*/
 }
 
+.flex-wrap {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
 .flex-item-25 {
   width: 25%;
 }

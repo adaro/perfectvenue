@@ -25,8 +25,12 @@
 
 <script type="text/javascript">
   $(function(){
-    $("#id_start_date").datepicker();
-    $("#id_end_date").datepicker();
+
+
+    $('#id_start_date').datetimepicker({formatTime: 'h A', format: 'Y-m-d h:m'});
+    $('#id_end_date').datetimepicker({formatTime: 'h A', format: 'Y-m-d h:m'});
+
+
   });
 </script>
 
