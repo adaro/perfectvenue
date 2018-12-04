@@ -5,6 +5,7 @@ from django.utils.decorators import method_decorator
 from django.core import serializers
 from ..models import Space, Venue
 import json
+from django.forms.models import model_to_dict
 
 
 class SpaceView(View):
@@ -12,11 +13,15 @@ class SpaceView(View):
         if request.GET.get('venue'):
             venue_object = Venue.objects.get(id=request.GET.get('venue'))  # TODO: handle does not exists here
             if request.GET.get('start_date') and request.GET.get('end_date'):
-                spaces = Space.get_spaces(venue_object, request.GET.get('start_date'), request.GET.get('end_date'))
+                spaces = Space.get_spaces_by_date(venue_object, request.GET.get('start_date'), request.GET.get('end_date'))
                 return HttpResponse(json.dumps(spaces), content_type="application/json")
 
-            spaces = serializers.serialize("json", Space.objects.filter(venue=venue_object))
-            return HttpResponse(spaces, content_type="application/json")
+            spaces = {'available': [], 'booked': []}
+            spaces_qs = Space.objects.filter(venue=venue_object)
+            for space in spaces_qs:
+                spaces['available'].append(model_to_dict(space))
+            print spaces
+            return HttpResponse(json.dumps(spaces), content_type="application/json")
 
         elif space_id:
             venue = serializers.serialize("json", Space.objects.filter(id=space_id))

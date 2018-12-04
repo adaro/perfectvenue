@@ -139,18 +139,31 @@ class Venue extends Component {
         this.setSpaceImages()
       })
     })
-     window.addEventListener('message', this.handleMessage, false);
+
+    this.getSpacesPromise().then(function(resp) {
+      console.log(resp)
+      self.setState({
+        spaces: resp
+      })
+    })
+    window.addEventListener('message', this.handleMessage, false);
 	}
+
+  getSpacesPromise = () => {
+    const getSpacesPromise = RestClient('GET', '/api/spaces/?venue=' + this.props.match.params.id)
+    return getSpacesPromise
+  }
 
   setSpaceImages = () => {
     const self = this;
-    const getSpacesPromise = RestClient('GET', '/api/spaces/?venue=' + this.props.match.params.id)
+    const getSpacesPromise = this.getSpacesPromise()
     getSpacesPromise.then(function(resp) {
       var stateArray = self.state.images.slice();
-      resp.filter(function(space) {
+      console.log(resp)
+      resp['available'].filter(function(space) {
         stateArray.push({
-          image_src: space.fields.photo,
-          legend: space.fields.name
+          image_src: space.photo,
+          legend: space.name
         })
       })
       self.setState({images:stateArray})

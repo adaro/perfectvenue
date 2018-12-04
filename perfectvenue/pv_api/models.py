@@ -39,7 +39,7 @@ class Space(models.Model):
 
     # TODO: Optimize this call
     @classmethod
-    def get_spaces(cls, venue_object, start_date, end_date):
+    def get_spaces_by_date(cls, venue_object, start_date, end_date):
         events = Event.objects.filter(venue=venue_object, start_date__gte=start_date, end_date__lte=end_date)
         spaces = []
         if events.exists():

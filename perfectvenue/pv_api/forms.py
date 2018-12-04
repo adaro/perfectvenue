@@ -12,10 +12,6 @@ class EventForm(ModelForm):
         widgets = {
             'start_date': forms.DateTimeInput(attrs={'class':'datepicker'}),
             'end_date': forms.DateTimeInput(attrs={'class': 'datepicker'}),
-            # 'start_date':
-            #     DateTimeWidget(attrs={'class': 'datepicker'}, usel10n=True, bootstrap_version=3),
-            # 'end_date':
-            #     DateTimeWidget(attrs={'class': 'datepicker'}, usel10n=True, bootstrap_version=3)
         }
 
 

@@ -40,7 +40,7 @@ class CreateEventView(View):
             end_date = request.GET.get('end_date')
             venue_object = Venue.objects.get(id=request.GET.get('venue'))
 
-            spaces = Space.get_spaces(venue_object, start_date, end_date)
+            spaces = Space.get_spaces_by_date(venue_object, start_date, end_date)
             space_ids = list(space['id'] for space in spaces['available'])
             spaces_qs = Space.objects.filter(venue=venue_object, id__in=space_ids)
 
@@ -66,7 +66,6 @@ class CreateEventView(View):
         obj.user = request.user
         obj.save()
         event_form.save_m2m()
-
         return redirect("{}{}{}".format("/api/events/", obj.id, "/created"))
 
 
