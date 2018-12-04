@@ -8,7 +8,7 @@ import { withStyles } from '@material-ui/core/styles';
 import Iframe from 'react-iframe'
 import Modal from '@material-ui/core/Modal';
 import PerfectvenueGlobals from '../PerfectvenueGlobals'
-const API = PerfectvenueGlobals.defaultProps.PROD;
+const API = PerfectvenueGlobals.defaultProps.DEV;
 
 function getModalStyle() {
   const top = 50

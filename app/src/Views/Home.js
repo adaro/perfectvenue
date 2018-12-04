@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import MediaCard from '../Components/Card'
 import RestClient from '../HTTP/RestClient';
 import PerfectvenueGlobals from '../PerfectvenueGlobals'
-const API = PerfectvenueGlobals.defaultProps.PROD;
+const API = PerfectvenueGlobals.defaultProps.DEV;
 
 
 class Home extends Component {

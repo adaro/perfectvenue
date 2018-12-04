@@ -1,6 +1,6 @@
 import PerfectvenueGlobals from '../PerfectvenueGlobals'
 
-const API = PerfectvenueGlobals.defaultProps.PROD;
+const API = PerfectvenueGlobals.defaultProps.DEV;
 
 export default (type, endpoint, params) => {
     if (type === 'POST') {

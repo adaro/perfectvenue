@@ -12,9 +12,10 @@ import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import CheckIcon from '@material-ui/icons/Check';
 import CancelIcon from '@material-ui/icons/Cancel';
+import FilterIcon from '@material-ui/icons/FilterList';
 
 
-const API = PerfectvenueGlobals.defaultProps.PROD;
+const API = PerfectvenueGlobals.defaultProps.DEV;
 
 const styles = theme => ({
   eventDetails: {
@@ -54,7 +55,8 @@ class Event extends Component {
 
 	state = {
 		events: [],
-		selectedEvent: null
+		selectedEvent: null,
+		filtered: false
 	}
 
 	componentDidMount = () => {
@@ -81,7 +83,7 @@ class Event extends Component {
     const getEventsPromise = RestClient('GET', '/api/events/?venue=' + this.props.match.params.id)
     const self = this;
     getEventsPromise.then(function(resp) {
-      self.setState({events: resp})
+      self.setState({events: resp, allEvents: resp})
     })
 	}
 
@@ -93,7 +95,8 @@ class Event extends Component {
 		// if deeplink - get event using ID
 		// set scrollToTime var from event date
 		// TODO: change this for props.history
-		window.history.pushState({}, document.title, "/venues/" + this.props.match.params.id + "/events/" + event.pk);
+		window.history.pushState({}, document.title, "/venues/" + this.props.match.params.id + "/events/" + event.id);
+		console.log(event, 77)
 		this.setState({selectedEvent: event})
 	}
 
@@ -105,9 +108,24 @@ class Event extends Component {
 		})
 	}
 
-	renderStatus() {
+	filterEvents = (spaceName) => {
+		const events = [];
+		this.state.allEvents.filter(function(event) {
+			event.spaces.filter(function(space) {
+				if (space.name == spaceName) {
+					events.push(event)
+				}
+			})
+		})
+		this.setState({events:events, filtered:true})
+	}
 
-		switch(this.state.selectedEvent.fields.status) {
+	clearFilters = () => {
+		this.setState({events: this.state.allEvents, filtered:false})
+	}
+
+	renderStatus() {
+		switch(this.state.selectedEvent.status) {
 			case "PN":
 					return (<b>PENDING</b>)
 			case "AP":
@@ -117,27 +135,48 @@ class Event extends Component {
 			case "CN":
 					return (<b>CANCELLED</b>)
 		}
-
 	}
 
   render() {
   	const { classes } = this.props;
   	const { selectedEvent } = this.state
+  	const self = this;
     return (
       <div className="flex">
 	      <div className="flex-item-75">
-	      	<EventCalendar eventsList={this.state.events} selected={this.state.selectedEvent ? this.state.selectedEvent.fields : null} handleSelectSlot={this.handleSelectSlot} handleSelectEvent={this.handleSelectEvent}/>
+
+	      	<div className="flex">
+	      		<Button variant="contained" color="secondary" disabled={!this.state.filtered} className={classes.button} onClick={() => {self.clearFilters()}}>
+	      		<CancelIcon className={classes.extendedIcon} />
+	      		Clear
+	      		</Button>
+
+		      	{this.state.allEvents ? this.state.allEvents.map(function(event) {
+		      		return (
+			      		event.spaces.map(function(space) {
+			      			return (
+			      				<Button variant="contained" color="primary" className={classes.button} onClick={() => {self.filterEvents(space.name)}}>
+			      				<FilterIcon className={classes.extendedIcon} />
+			      				{space.name}
+			      				</Button>
+			      				)
+			      		})
+			      	)
+		      	}) : null}
+	      	</div>
+
+	      	<EventCalendar eventsList={this.state.events} selected={this.state.selectedEvent ? this.state.selectedEvent : null} handleSelectSlot={this.handleSelectSlot} handleSelectEvent={this.handleSelectEvent}/>
 	      </div>
 	      <div className={"flex-item-25 " + classes.eventDetails}>
 	      	{ selectedEvent ?
 	      		<div>
-		      		<h2>{this.state.selectedEvent.fields.name}</h2>
+		      		<h2>{this.state.selectedEvent.name}</h2>
 		      		<div>Status: {this.renderStatus()}</div>
-		      		<p className={classes.eventRequestNotes}>{this.state.selectedEvent.fields.notes}</p>
+		      		<p className={classes.eventRequestNotes}>{this.state.selectedEvent.notes}</p>
 
 		      		<div className={classes.dateContainer}>
-		      			<div>Start: <small>{moment(this.state.selectedEvent.fields.start_date).format('YYYY/MM/DD hh:mm a').toString()}</small></div>
-		      			<div>End: <small>{moment(this.state.selectedEvent.fields.end_date).format('YYYY/MM/DD hh:mm a').toString()}</small></div>
+		      			<div>Start: <small>{moment(this.state.selectedEvent.start_date).format('YYYY/MM/DD hh:mm a').toString()}</small></div>
+		      			<div>End: <small>{moment(this.state.selectedEvent.end_date).format('YYYY/MM/DD hh:mm a').toString()}</small></div>
 		      		</div>
 
 		      		<div className={classes.venueCoordNotes}>

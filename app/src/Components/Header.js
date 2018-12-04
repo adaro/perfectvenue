@@ -24,7 +24,7 @@ import RestClient from '../HTTP/RestClient';
 const setSessionKey = PerfectvenueGlobals.defaultProps.setSessionKey;
 const getParam = PerfectvenueGlobals.defaultProps.getParam;
 
-const API = PerfectvenueGlobals.defaultProps.PROD;
+const API = PerfectvenueGlobals.defaultProps.DEV;
 
 const styles = {
   root: {

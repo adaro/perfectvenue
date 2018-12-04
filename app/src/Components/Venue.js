@@ -14,7 +14,7 @@ import CheckboxList from './List'
 import VenueCarousel from './Carousel'
 
 import PerfectvenueGlobals from '../PerfectvenueGlobals'
-const API = PerfectvenueGlobals.defaultProps.PROD;
+const API = PerfectvenueGlobals.defaultProps.DEV;
 
 const styles = theme => ({
   root: {
@@ -127,6 +127,7 @@ class Venue extends Component {
     const getVenuePromise = RestClient('GET', '/api/venues/' + this.props.match.params.id)
     const self = this;
     getVenuePromise.then(function(resp) {
+      console.log(resp, 88)
       self.setState({
         venueId:resp[0].pk,
         venue: resp[0].fields,
