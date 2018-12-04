@@ -8,9 +8,10 @@ from perfectvenue import settings
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin import widgets
-
+from django.db.models import prefetch_related_objects
 from rest_framework.decorators import api_view
-
+from django.db.models import Prefetch
+from django.forms.models import model_to_dict
 
 from ..forms import EventForm
 from ..models import User, Event, Venue, Space
@@ -55,7 +56,7 @@ class CreateEventView(View):
         token = Token.objects.get(user=request.user)
         return render(request, 'events/event.html', {
             "form": self.form,
-            "client": settings.HOSTS['PROD']['client'],
+            "client": settings.HOSTS['settings.ENV']['client'],
             "token": token.key
         })
 
@@ -71,7 +72,7 @@ class CreateEventView(View):
 
 class CreatedEventView(View):
     def get(self, request, event_id=None):
-        return render(request, 'events/created.html', context={"client": settings.HOSTS['PROD']['client']})
+        return render(request, 'events/created.html', context={"client": settings.HOSTS['settings.ENV']['client']})
 
 # TODO: we need a custom domain in order to use Token based auth (or so i think). When ready turn this back on and test
 # TODO: it works locally just fine and that's how i can be sure it's the SSL/HTTPS on AWS
@@ -81,16 +82,19 @@ class EventView(View):
 
         if request.GET.get('venue'):
             venue_object = Venue.objects.get(id=request.GET.get('venue'))
-            events = serializers.serialize("json", Event.objects.filter(venue=venue_object))
-            return HttpResponse(events, content_type="application/json")
+            # events = serializers.serialize("json", Event.objects.filter(venue=venue_object))
+
+            qs = json.dumps([a.get_json() for a in Event.objects.filter(venue=venue_object)])
+
+            return HttpResponse(qs, content_type="application/json")
 
         if request.GET.get('name'):
             events = serializers.serialize("json", Event.objects.filter(name__icontains=request.GET.get('name')))
             return HttpResponse(events, content_type="application/json")
 
         if event_id:
-            event = serializers.serialize("json", Event.objects.filter(id=event_id))
-            return HttpResponse(event, content_type="application/json")
+            qs = json.dumps([a.get_json() for a in Event.objects.filter(id=event_id)])
+            return HttpResponse(qs, content_type="application/json")
 
     def put(self, request, event_id):
         json_request = json.loads(request.body)['params']

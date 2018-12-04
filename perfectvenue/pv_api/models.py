@@ -99,6 +99,20 @@ class Event(models.Model):
     status = models.CharField(choices=STATUSES, max_length=200, blank=True, null=True, default='PN')
     coordinators = models.ManyToManyField(User, related_name='event_coordinators') # event coords
 
+    def get_json(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'user': self.user.email,
+            'venue': self.venue.id,
+            'start_date': str(self.start_date),
+            'end_date': str(self.end_date),
+            'notes': self.notes,
+            'status': self.status,
+            'coordinators': [{'id': c.id, 'email': c.email} for c in self.coordinators.all()],
+            'spaces': [{'id': s.id, 'name': s.name} for s in self.spaces.all()]
+        }
+
     def get_spaces(self):
         return self.spaces
 
