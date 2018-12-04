@@ -7,11 +7,6 @@ from perfectvenue.forms import EventCoordinatorSignUpForm
 from perfectvenue import settings
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.decorators import login_required
-from django.contrib.admin import widgets
-from django.db.models import prefetch_related_objects
-from rest_framework.decorators import api_view
-from django.db.models import Prefetch
-from django.forms.models import model_to_dict
 
 from ..forms import EventForm
 from ..models import User, Event, Venue, Space
@@ -56,7 +51,7 @@ class CreateEventView(View):
         token = Token.objects.get(user=request.user)
         return render(request, 'events/event.html', {
             "form": self.form,
-            "client": settings.HOSTS['settings.ENV']['client'],
+            "client": settings.HOSTS[settings.ENV]['client'],
             "token": token.key
         })
 
@@ -72,7 +67,7 @@ class CreateEventView(View):
 
 class CreatedEventView(View):
     def get(self, request, event_id=None):
-        return render(request, 'events/created.html', context={"client": settings.HOSTS['settings.ENV']['client']})
+        return render(request, 'events/created.html', context={"client": settings.HOSTS[settings.ENV]['client']})
 
 # TODO: we need a custom domain in order to use Token based auth (or so i think). When ready turn this back on and test
 # TODO: it works locally just fine and that's how i can be sure it's the SSL/HTTPS on AWS

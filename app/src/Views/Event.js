@@ -155,7 +155,7 @@ class Event extends Component {
 
 	renderSpaceFilters = () => {
 		const { classes } = this.props;
-		const self = this
+		const self = this;
 		return (
 			<div>
 				{spaces.map(function(space) {
