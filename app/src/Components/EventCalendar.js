@@ -7,17 +7,11 @@ class EventCalendar extends Component {
 
   render() {
 
-  	console.log(this.props.eventsList, 99)
-
-  	this.props.eventsList.filter(function(event) {
-
-  	})
-
     return (
 	   <div>
 	    <BigCalendar
 	      selectable
-				scrollToTime={this.props.scrollToTime}
+				// scrollToTime={this.props.scrollToTime}
         // defaultDate={this.props.defaultDate}
 				eventPropGetter={event => {
 						if (this.props.selected && this.props.selected.name === event.name) {
@@ -30,8 +24,8 @@ class EventCalendar extends Component {
         selected={this.props.selected}
 	    	events={this.props.eventsList}
 	      titleAccessor={(event) => { return event.name }}
-	      startAccessor={(event) => { return moment(event.start_date) }}
-	      endAccessor={(event) => { return moment(event.end_date) }}
+	      startAccessor={(event) => { return moment(event.start_date).toDate(); }}
+	      endAccessor={(event) => { return moment(event.end_date).toDate(); }}
 	      localizer={localizer}
 	      onSelectEvent={event => this.props.handleSelectEvent(event)}
         onSelectSlot={this.props.handleSelectSlot} // TODO: create new event form on mouse click up
