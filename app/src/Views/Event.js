@@ -15,7 +15,7 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import FilterIcon from '@material-ui/icons/FilterList';
 
 
-const API = PerfectvenueGlobals.defaultProps.DEV;
+const API = PerfectvenueGlobals.defaultProps.PROD;
 
 const styles = theme => ({
   eventDetails: {
@@ -50,6 +50,8 @@ const styles = theme => ({
     marginRight: theme.spacing.unit,
   },
 })
+
+const spaces = []
 
 class Event extends Component {
 
@@ -137,10 +139,50 @@ class Event extends Component {
 		}
 	}
 
+	uniq = (a) => {
+	   return Array.from(new Set(a));
+	}
+
+	renderSpaces = (event) => {
+
+		event.spaces.map(function(space) {
+			if (!spaces.includes(space.name)) {
+				spaces.push(space.name)
+				}
+		})
+
+	}
+
+	renderSpaceFilters = () => {
+		const { classes } = this.props;
+		const self = this
+		return (
+			<div>
+				{spaces.map(function(space) {
+					return (
+							<Button variant="contained" color="primary" className={classes.button} onClick={() => {self.filterEvents(space)}}>
+							<FilterIcon className={classes.extendedIcon} />
+							{space}
+							</Button>
+						)
+					})
+				}
+			</div>
+			)
+
+	}
+
   render() {
   	const { classes } = this.props;
   	const { selectedEvent } = this.state
   	const self = this;
+
+  	if (this.state.allEvents) {
+  			this.state.allEvents.map(function(event) {
+  				self.renderSpaces(event)
+	  		})
+	  }
+
     return (
       <div className="flex">
 	      <div className="flex-item-75">
@@ -151,18 +193,9 @@ class Event extends Component {
 	      		Clear
 	      		</Button>
 
-		      	{this.state.allEvents ? this.state.allEvents.map(function(event) {
-		      		return (
-			      		event.spaces.map(function(space) {
-			      			return (
-			      				<Button variant="contained" color="primary" className={classes.button} onClick={() => {self.filterEvents(space.name)}}>
-			      				<FilterIcon className={classes.extendedIcon} />
-			      				{space.name}
-			      				</Button>
-			      				)
-			      		})
-			      	)
-		      	}) : null}
+
+
+		      	{this.renderSpaceFilters()}
 	      	</div>
 
 	      	<EventCalendar eventsList={this.state.events} selected={this.state.selectedEvent ? this.state.selectedEvent : null} handleSelectSlot={this.handleSelectSlot} handleSelectEvent={this.handleSelectEvent}/>

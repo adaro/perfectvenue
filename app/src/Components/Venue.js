@@ -14,7 +14,7 @@ import CheckboxList from './List'
 import VenueCarousel from './Carousel'
 
 import PerfectvenueGlobals from '../PerfectvenueGlobals'
-const API = PerfectvenueGlobals.defaultProps.DEV;
+const API = PerfectvenueGlobals.defaultProps.PROD;
 
 const styles = theme => ({
   root: {
