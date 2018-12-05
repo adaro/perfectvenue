@@ -38,6 +38,10 @@ const styles = theme => ({
 		color: '#464649',
 		marginLeft: 55
   },
+  spaceName: {
+    textAlign: 'center',
+    color: '#464649',
+  },
   venueDescritpion: {
   	textAlign: 'left',
   	width: '80%',
@@ -160,8 +164,13 @@ class Venue extends Component {
     const getSpacesPromise = this.getSpacesPromise()
     getSpacesPromise.then(function(resp) {
       var stateArray = self.state.images.slice();
-      console.log(resp)
       resp['available'].filter(function(space) {
+        stateArray.push({
+          image_src: space.photo,
+          legend: space.name
+        })
+      })
+      resp['booked'].filter(function(space) {
         stateArray.push({
           image_src: space.photo,
           legend: space.name
@@ -296,7 +305,7 @@ class Venue extends Component {
 
               {spaces.available || spaces.booked ? (
               <div className="align-center">
-                <h2>Spaces</h2>
+                <h2 className={classes.spaceName}>Spaces</h2>
                 <CheckboxList data={spaces.available} setSelectedSpace={this.setSelectedSpace} status="AVAILABLE"/>
                 <CheckboxList data={spaces.booked} setSelectedSpace={this.setSelectedSpace} status="BOOKED"/>
                 <Button disabled={this.state.startDate == null} variant="contained" color="primary" aria-label="Request to Book" className={classes.button} onClick={this.requestBooking}>
