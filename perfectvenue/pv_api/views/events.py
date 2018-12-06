@@ -26,7 +26,7 @@ class CoordinatorSignUpView(CreateView):
         login(self.request, user)
         return redirect('/accounts/redirect/')
 
-@method_decorator(login_required, name='dispatch')
+# @method_decorator(login_required, name='dispatch')
 class CreateEventView(View):
     form = EventForm()
 
@@ -57,12 +57,30 @@ class CreateEventView(View):
 
     def post(self, request):
         print 'posting to event'
-        event_form = EventForm(request.POST)
-        obj = event_form.save(commit=False)
-        obj.user = request.user
-        obj.save()
-        event_form.save_m2m()
-        return redirect("{}{}{}".format("/api/events/", obj.id, "/created"))
+        form_object = json.loads(request.body)['params']
+        # TODO: get spaces and get m2m ids
+        # TODO: get user instance from Auth token
+
+        venu_obj = Venue.objects.get(id=form_object['venue'])
+
+        created_event = Event.objects.create(
+            user=User.objects.get(id=1), # TODO: hardcoding this for now, will need to setup Auth token first
+            name=form_object['name'],
+            venue=venu_obj,
+            start_date=form_object['startDate'],
+            end_date=form_object['endDate'],
+            # spaces=request.body['spaces'],
+        )
+
+        print created_event
+
+        # event_form = EventForm(request.POST)
+        # obj = event_form.save(commit=False)
+        # obj.user = request.user
+        # obj.save()
+        # event_form.save_m2m()
+
+        return redirect("{}{}{}".format("/api/events/", created_event.id, "/created"))
 
 
 class CreatedEventView(View):

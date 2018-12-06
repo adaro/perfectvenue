@@ -85,6 +85,7 @@ class Event extends Component {
     const getEventsPromise = RestClient('GET', '/api/events/?venue=' + this.props.match.params.id)
     const self = this;
     getEventsPromise.then(function(resp) {
+    	console.log(resp)
       self.setState({events: resp, allEvents: resp})
     })
 	}
@@ -104,7 +105,7 @@ class Event extends Component {
 
 	updateStatus = (status) => {
 		var self = this;
-		const putEventStatusPromise = RestClient('PUT', '/api/events/' + this.state.selectedEvent.pk + "/",  {"status": status})
+		const putEventStatusPromise = RestClient('PUT', '/api/events/' + this.state.selectedEvent.id + "/",  {"status": status})
 		putEventStatusPromise.then(function(resp) {
 			self.getEvent()
 		})
@@ -169,6 +170,13 @@ class Event extends Component {
 				}
 			</div>
 			)
+	}
+
+	convertDates = (dateString) => {
+
+		var dateUtc = moment.utc(dateString);
+		var localDate = moment(dateUtc).local();
+		return localDate
 
 	}
 
@@ -208,8 +216,8 @@ class Event extends Component {
 		      		<p className={classes.eventRequestNotes}>{this.state.selectedEvent.notes}</p>
 
 		      		<div className={classes.dateContainer}>
-		      			<div>Start: <small>{moment(this.state.selectedEvent.start_date).format('YYYY/MM/DD hh:mm a').toString()}</small></div>
-		      			<div>End: <small>{moment(this.state.selectedEvent.end_date).format('YYYY/MM/DD hh:mm a').toString()}</small></div>
+		      			<div>Start: <small>{moment(this.state.selectedEvent.start_date).utc().format('YYYY/MM/DD hh:mm a').toString()}</small></div>
+		      			<div>End: <small>{moment(this.state.selectedEvent.end_date).utc().format('YYYY/MM/DD hh:mm a').toString()}</small></div>
 		      		</div>
 
 		      		<div className={classes.venueCoordNotes}>

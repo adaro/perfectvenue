@@ -12,7 +12,8 @@ import Iframe from 'react-iframe'
 import Modal from '@material-ui/core/Modal';
 import CheckboxList from './List'
 import VenueCarousel from './Carousel'
-
+import AddEvent from '../Views/AddEvent'
+import moment from 'moment'
 import PerfectvenueGlobals from '../PerfectvenueGlobals'
 const API = PerfectvenueGlobals.defaultProps.PROD;
 
@@ -196,18 +197,70 @@ class Venue extends Component {
 	}
 
 	onDateChange = (value) => {
+    var startDateJS = new Date(value[0]);
+    const startDate = moment(startDateJS).format()
+    var endDateJS = new Date(value[1]);
+    const endDate = moment(endDateJS).format()
+
 		const url = '/api/spaces/' +
     	'?venue=' + this.state.venueId + '&start_date=' +
-    	value[0].toISOString().split('T')[0] + '&end_date=' +
-    	value[1].toISOString().split('T')[0]
+    	startDate.toString().split('T')[0] + '&end_date=' +
+    	endDate.toString().split('T')[0]
 
     const getSpacesPromise = RestClient('GET', url)
     const self = this;
     getSpacesPromise.then(function(resp) {
-      self.setState({spaces: resp, startDate: value[0].toISOString().split('T')[0], endDate: value[1].toISOString().split('T')[0]})
+      self.setState({spaces: resp, startDate: startDateJS, endDate: endDateJS})
+    })
+	}
+
+  onFormDateChange = (type, value) => {
+    switch(type) {
+      case 'startDate':
+        const startDate = new Date(value);
+        // const startDate = moment(value)
+        this.setState({startDate})
+        return
+      case 'endDate':
+        const endDate = new Date(value);
+        this.setState({endDate})
+        return
+    }
+  }
+
+
+  handleSubmit = (event) => {
+    event.preventDefault()
+
+    const url = '/api/events/create/'
+
+    const data = new FormData(event.target);
+
+
+    var object = {};
+    data.forEach(function(value, key){
+        object[key] = value;
+    });
+
+    object['venue'] = this.state.venueId
+
+    console.log(object)
+
+
+    // const startDate = moment(this.state.startDate).format()
+    // data.set('startDate', startDate);
+    // const endDate = moment(this.state.endDate).format()
+    // data.set('endDate', endDate)
+
+    // console.log(data)
+
+    const postFormPromise = RestClient('POST', url, object)
+    postFormPromise.then(function(resp) {
+      console.log(resp)
     })
 
-	}
+
+  }
 
 	requestBooking = () => {
 		// show modal iframe
@@ -218,29 +271,29 @@ class Venue extends Component {
     this.setState({ open: false });
   };
 
+  handleFormChange = (event) => {
+    const target = event.target;
+    const value = target.value;
+    const name = target.name;
 
-  // TODO: this should be in a seperate AddEvent.js compoenent
+    this.setState({
+      [name]: value
+    }, function(resp) {
+      console.log(this.state)
+    });
+  }
+
 	renderModalIframe = () => {
 		const { classes } = this.props;
 		const url = API.host +  "/api/events/create/?venue=" + this.state.venueId +  "&start_date=" + this.state.startDate + "&end_date=" + this.state.endDate
 		return (
-				<Modal
-          aria-labelledby="simple-modal-title"
-          aria-describedby="simple-modal-description"
-          open={this.state.open}
-          onClose={this.handleClose}
-        >
-          <div style={getModalStyle()} className={classes.paper}>
-          	<Iframe url={url}
-			        width="100%"
-			        height="435px"
-			        id="myId"
-			        className="myClassname"
-			        display="initial"
-			        position="relative"
-			        allowFullScreen/>
-          </div>
-        </Modal>
+        <AddEvent handleClose={this.handleClose} handleSubmit={this.handleSubmit} onFormDateChange={this.onFormDateChange} handleChange={this.handleFormChange} open={this.state.open} booking={{
+          name: '',
+          venue: this.state.venue,
+          spaces: this.state.spaces,
+          startDate: this.state.startDate,
+          endDate: this.state.endDate
+        }}/>
 			)
 
 	}
@@ -279,6 +332,7 @@ class Venue extends Component {
             <div classes={classes.bookingContainer + " flex-item-33"}>
               <Calendar
                 // tileDisabled={({activeStartDate, date, view }) => date.getDay() === 0}
+                utcOffset={0}
                 className={classes.calendar}
                 tileDisabled={
                   ({activeStartDate, date, view }) => date < new Date()
