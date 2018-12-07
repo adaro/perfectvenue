@@ -30,30 +30,41 @@ const styles = theme => ({
 
 class CheckboxList extends React.Component {
 
-  render() {
-    const { classes, data, status, setSelectedSpace } = this.props;
+  renderList = (value, index) => {
+    const { classes, data, status, setSelectedSpace, checkSelectedSpace } = this.props;
+    if (value.status) {
+      return (
+          <ListItem key={value.obj.name} role={undefined} dense button onClick={setSelectedSpace.bind(this, value.obj, index, value.status)}>
+           <ListItemAvatar>
+              <Avatar alt="S" src={value.obj.photo} />
+            </ListItemAvatar>
+            <ListItemText primary={`${value.obj.name}`} secondary={<Typography type="span" className={classes[value.status]}>{value.status}</Typography>} />
+            <ListItemSecondaryAction>
+            </ListItemSecondaryAction>
+             <Checkbox
+                onClick={this.props.checkSelectedSpace.bind(this, value.obj, value.status)}
+                disabled={this.props.startDate == null}
+                checked={this.props.checked.indexOf(value.obj) !== -1}
+                tabIndex={-1}
+                disableRipple={true}
+                disabled={value.status == "BOOKED"}
+              />
+          </ListItem>
+      )
+    }
 
+    else {
+      return null
+    }
+  }
+
+  render() {
+    const { classes, data, status, setSelectedSpace, checkSelectedSpace } = this.props;
+    const self = this
     return (
       <List className={classes.root}>
         {data.map((value, index) => (
-          <ListItem disabled={this.props.startDate == null} key={value.name} role={undefined} dense button onClick={setSelectedSpace.bind(this, value, index + 1, status)}>
-           <ListItemAvatar>
-              <Avatar alt="S" src={value.photo} />
-            </ListItemAvatar>
-
-            <ListItemText primary={`${value.name}`} secondary={<Typography type="span" className={classes[status]}>{status}</Typography>} />
-            <ListItemSecondaryAction>
-
-            </ListItemSecondaryAction>
-
-             <Checkbox
-                  checked={this.props.checked.indexOf(value) !== -1}
-                  tabIndex={-1}
-                  disableRipple={true}
-                  disabled={status == "BOOKED"}
-                />
-
-          </ListItem>
+          self.renderList(value, index)
         ))}
       </List>
     );

@@ -7,9 +7,10 @@ class SimpleSlider extends React.Component {
     }
 
     componentWillReceiveProps = (props) => {
-      console.log(props.selectedElement)
-      this.slider.slickGoTo(props.selectedElement)
-      this.setState({images: props.images })
+      const self = this;
+      this.setState({images: props.images }, function(resp) {
+        self.slider.slickGoTo(props.selectedElement)
+      })
     }
 
 
@@ -26,9 +27,8 @@ class SimpleSlider extends React.Component {
       <Slider {...settings}  ref={slider => (this.slider = slider)}>
         {this.state.images.map(function(image) {
             return (
-                <div key={image.ledgend}>
-                    <img src={image.image_src} />
-                    <p className="legend">{image.ledgend}</p>
+                <div key={image.obj.name}>
+                    <img src={image.obj.photo} />
                 </div>
             )
         })}

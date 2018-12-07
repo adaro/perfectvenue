@@ -120,7 +120,7 @@ class Venue extends Component {
 		startDate: null,
 		endDate: null,
 		open: false,
-		spaces: [{'available': null}],
+		spaces: [],
     images: [],
     showStatus: false, // REMOVE - ONLY FOR DEMO PURPOSE
     selectedSpace: null,
@@ -137,47 +137,45 @@ class Venue extends Component {
         venueId:resp[0].pk,
         venue: resp[0].fields,
         loading: false,
-        images: [{
-          image_src: resp[0].fields.photo,
-          legend: resp[0].fields.name
+        spaces: [{
+          status: null,
+          obj: resp[0].fields
         }]
-      }, function(resp) {
-        this.setSpaceImages()
+      }, function() {
+        this.getSpacesPromise().then(function(resp) {
+          self.formatSpaces(resp)
+        })
       })
     })
 
-    this.getSpacesPromise().then(function(resp) {
-      self.setState({
-        spaces: resp
+	}
+
+  formatSpaces = (resp) => {
+    const self = this;
+    const arr = [] //self.state.spaces.slice()
+    resp['available'].map((value) => {
+      arr.push({
+        status: 'AVAILABLE',
+        obj: value
       })
     })
-	}
+    resp['booked'].map((value) => {
+      arr.push({
+        status: 'BOOKED',
+        obj: value
+      })
+    })
+    console.log(arr, 54545)
+    self.setState({
+      spaces: arr
+    })
+  }
 
   getSpacesPromise = () => {
     const getSpacesPromise = RestClient('GET', '/api/spaces/?venue=' + this.props.match.params.id)
     return getSpacesPromise
   }
 
-  setSpaceImages = () => {
-    const self = this;
-    const getSpacesPromise = this.getSpacesPromise()
-    getSpacesPromise.then(function(resp) {
-      var stateArray = self.state.images.slice();
-      resp['available'].filter(function(space) {
-        stateArray.push({
-          image_src: space.photo,
-          legend: space.name
-        })
-      })
-      resp['booked'].filter(function(space) {
-        stateArray.push({
-          image_src: space.photo,
-          legend: space.name
-        })
-      })
-      self.setState({images:stateArray})
-    })
-  }
 
 	goBack = () => {
 		this.props.history.goBack();
@@ -197,7 +195,8 @@ class Venue extends Component {
     const getSpacesPromise = RestClient('GET', url)
     const self = this;
     getSpacesPromise.then(function(resp) {
-      self.setState({spaces: resp, startDate: startDateJS, endDate: endDateJS})
+      self.formatSpaces(resp)
+      self.setState({startDate: startDateJS, endDate: endDateJS})
     })
 	}
 
@@ -279,8 +278,14 @@ class Venue extends Component {
 
   setSelectedSpace = (space, index, status) => {
     const self = this;
+    console.log(index)
     this.setState({selectedSpace: space, selectedIndex: index}, function(resp) {
-      const { checked } = self.state;
+
+    })
+  }
+
+  checkSelectedSpace = (space, status) => {
+      const { checked } = this.state;
       const currentIndex = checked.indexOf(space);
       const newChecked = [...checked];
       if (status === 'BOOKED') {return;}
@@ -289,10 +294,9 @@ class Venue extends Component {
       } else {
         newChecked.splice(currentIndex, 1);
       }
-      self.setState({
+      this.setState({
         checked: newChecked,
       });
-    })
   }
 
 
@@ -308,7 +312,7 @@ class Venue extends Component {
 
         <BackIcon className={classes.backIcon} onClick={this.goBack}/>
 
-        <VenueCarousel images={this.state.images} selectedElement={this.state.selectedIndex} className={classes.carousel}/>
+        <VenueCarousel images={this.state.spaces} selectedElement={this.state.selectedIndex} className={classes.carousel}/>
 
 	    		<div className="flex">
 
@@ -348,11 +352,10 @@ class Venue extends Component {
                   </div>
                 ): null}
 
-              {spaces.available || spaces.booked ? (
+              {spaces ? (
               <div className="align-center">
                 <h2 className={classes.spaceName}>Spaces</h2>
-                <CheckboxList startDate={this.state.startDate} checked={this.state.checked} data={spaces.available} setSelectedSpace={this.setSelectedSpace} status="AVAILABLE"/>
-                <CheckboxList startDate={this.state.startDate} checked={this.state.checked} data={spaces.booked} setSelectedSpace={this.setSelectedSpace} status="BOOKED"/>
+                <CheckboxList startDate={this.state.startDate} checked={this.state.checked} data={spaces} setSelectedSpace={this.setSelectedSpace} checkSelectedSpace={this.checkSelectedSpace}/>
                 <Button disabled={this.state.checked.length == 0} variant="contained" color="primary" aria-label="Request to Book" className={classes.button} onClick={this.requestBooking}>
                   <CheckIcon className={classes.extendedIcon} />
                   Request to Book

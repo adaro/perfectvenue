@@ -77,7 +77,6 @@ class AddEvent extends Component {
                   margin="normal"
                 />
 
-
                 <FormGroup className={classes.textField}>
                   <FormLabel component="legend">Start Date</FormLabel>
                   <DateTimePicker name="startDate" onChange={this.props.onFormDateChange.bind(this, 'startDate')} value={this.props.booking.startDate}/>
