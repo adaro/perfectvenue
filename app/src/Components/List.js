@@ -29,35 +29,6 @@ const styles = theme => ({
 });
 
 class CheckboxList extends React.Component {
-  state = {
-    checked: [0],
-  };
-
-  // TODO: add back in the checkbox
-  //   <Checkbox
-  //   checked={this.state.checked.indexOf(value) !== -1}
-  //   tabIndex={-1}
-  //   disableRipple={true}
-  //   disabled={status == "BOOKED"}
-  // />
-
-  // handleToggle = (value, status) => () => {
-  //   const { checked } = this.state;
-  //   const currentIndex = checked.indexOf(value);
-  //   const newChecked = [...checked];
-
-  //   if (status === 'BOOKED') {return;}
-
-  //   if (currentIndex === -1) {
-  //     newChecked.push(value);
-  //   } else {
-  //     newChecked.splice(currentIndex, 1);
-  //   }
-
-  //   this.setState({
-  //     checked: newChecked,
-  //   });
-  // };
 
   render() {
     const { classes, data, status, setSelectedSpace } = this.props;
@@ -65,17 +36,23 @@ class CheckboxList extends React.Component {
     return (
       <List className={classes.root}>
         {data.map((value, index) => (
-          <ListItem key={value.name} role={undefined} dense button onClick={setSelectedSpace.bind(this, value, index + 1)}>
+          <ListItem disabled={this.props.startDate == null} key={value.name} role={undefined} dense button onClick={setSelectedSpace.bind(this, value, index + 1, status)}>
            <ListItemAvatar>
               <Avatar alt="S" src={value.photo} />
             </ListItemAvatar>
 
             <ListItemText primary={`${value.name}`} secondary={<Typography type="span" className={classes[status]}>{status}</Typography>} />
             <ListItemSecondaryAction>
-              <IconButton aria-label="Comments">
-                <InfoIcon />
-              </IconButton>
+
             </ListItemSecondaryAction>
+
+             <Checkbox
+                  checked={this.props.checked.indexOf(value) !== -1}
+                  tabIndex={-1}
+                  disableRipple={true}
+                  disabled={status == "BOOKED"}
+                />
+
           </ListItem>
         ))}
       </List>

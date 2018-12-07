@@ -35,22 +35,25 @@ export default createMuiTheme({
       MuiInput: {
         // Name of the styleSheet
         underline: {
-          '&:hover:not($disabled):before': {
-            display: 'none',
-          },
-          '&:hover:not($disabled):after': {
-            display: 'none',
-          },
-          '&:hover:not($disabled):not($error):not($focused):before': {
-            display: 'none'
-          },
-          '&:after': {
-            display: 'none',
-          },
-          '&:before': {
-            display: 'none',
-          }
+
+          // '&:hover:not($disabled):before': {
+          //   display: 'none',
+          // },
+          // '&:hover:not($disabled):after': {
+          //   display: 'none',
+          // },
+          // '&:hover:not($disabled):not($error):not($focused):before': {
+          //   display: 'none'
+          // },
+          // '&:after': {
+          //   display: 'none',
+          // },
+          // '&:before': {
+          //   display: 'none',
+          // }
+
         },
+
       },
     },
 

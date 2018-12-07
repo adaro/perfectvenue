@@ -2,8 +2,15 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom'
 import { browserHistory } from 'react-router'
+import TextField from '@material-ui/core/TextField';
 import DateTimePicker from 'react-datetime-picker';
 import { withStyles } from '@material-ui/core/styles';
+import FormLabel from '@material-ui/core/FormLabel';
+import FormControl from '@material-ui/core/FormControl';
+import FormGroup from '@material-ui/core/FormGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Button from '@material-ui/core/Button';
+
 import Modal from '@material-ui/core/Modal';
 import PerfectvenueGlobals from '../PerfectvenueGlobals'
 const API = PerfectvenueGlobals.defaultProps.PROD;
@@ -26,7 +33,11 @@ const styles = theme => ({
     backgroundColor: theme.palette.background.paper,
     boxShadow: theme.shadows[5],
     // padding: theme.spacing.unit * 4,
-  }
+  },
+  textField: {
+    margin: '20px auto',
+    width: '80%',
+  },
 });
 
 class AddEvent extends Component {
@@ -54,28 +65,29 @@ class AddEvent extends Component {
           onClose={this.props.handleClose}
         >
           <div style={getModalStyle()} className={classes.paper}>
-            <form className={"flex-column"} onSubmit={this.props.handleSubmit}>
-              <label>
-                What is the name of your Event?
-                <input type="text" name="name"  onChange={this.props.handleChange} />
-              </label>
+            <form className={"flex-column"} onSubmit={this.props.handleSubmit} autoComplete="off">
 
-              <label>
-                Which spaces would you like to book?
-                <select multiple={true} name="spaces" value={this.props.booking.spaces} onChange={this.props.handleChange}></select>
-              </label>
+                <TextField
+                  id="event-name"
+                  name="name"
+                  label="What is the name of your Event?"
+                  className={classes.textField}
+                  value={this.state.name}
+                  onChange={this.props.handleChange}
+                  margin="normal"
+                />
 
-              <label>
-                Start time?
-                <DateTimePicker name="startDate" onChange={this.props.onFormDateChange.bind(this, 'startDate')} value={this.props.booking.startDate}/>
-              </label>
 
-              <label>
-                End time?
-                <DateTimePicker name="endDate" onChange={this.props.onFormDateChange.bind(this, 'endDate')} value={this.props.booking.endDate}/>
-              </label>
+                <FormGroup className={classes.textField}>
+                  <FormLabel component="legend">Start Date</FormLabel>
+                  <DateTimePicker name="startDate" onChange={this.props.onFormDateChange.bind(this, 'startDate')} value={this.props.booking.startDate}/>
+                </FormGroup>
+                <FormGroup className={classes.textField}>
+                  <FormLabel component="legend">End Date</FormLabel>
+                  <DateTimePicker name="endDate" onChange={this.props.onFormDateChange.bind(this, 'endDate')} value={this.props.booking.endDate}/>
+                </FormGroup>
+                <Button type="submit" className={classes.textField} variant="contained" color="primary">Request Booking</Button>
 
-              <input type="submit" value="Submit" />
             </form>
           </div>
         </Modal>

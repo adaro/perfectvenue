@@ -85,7 +85,6 @@ class Event extends Component {
     const getEventsPromise = RestClient('GET', '/api/events/?venue=' + this.props.match.params.id)
     const self = this;
     getEventsPromise.then(function(resp) {
-    	console.log(resp)
       self.setState({events: resp, allEvents: resp})
     })
 	}
@@ -97,9 +96,7 @@ class Event extends Component {
 	handleSelectEvent = (event) => {
 		// if deeplink - get event using ID
 		// set scrollToTime var from event date
-		// TODO: change this for props.history
-		window.history.pushState({}, document.title, "/venues/" + this.props.match.params.id + "/events/" + event.id);
-		console.log(event, 77)
+		this.props.history.push("/venues/" + this.props.match.params.id + "/events/" + event.id);
 		this.setState({selectedEvent: event})
 	}
 
@@ -200,9 +197,6 @@ class Event extends Component {
 	      		<CancelIcon className={classes.extendedIcon} />
 	      		Clear
 	      		</Button>
-
-
-
 		      	{this.renderSpaceFilters()}
 	      	</div>
 

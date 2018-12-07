@@ -125,6 +125,7 @@ class Venue extends Component {
     showStatus: false, // REMOVE - ONLY FOR DEMO PURPOSE
     selectedSpace: null,
     selectedIndex: 0,
+    checked: [],
 	}
 
 
@@ -132,7 +133,6 @@ class Venue extends Component {
     const getVenuePromise = RestClient('GET', '/api/venues/' + this.props.match.params.id)
     const self = this;
     getVenuePromise.then(function(resp) {
-      console.log(resp, 88)
       self.setState({
         venueId:resp[0].pk,
         venue: resp[0].fields,
@@ -147,12 +147,10 @@ class Venue extends Component {
     })
 
     this.getSpacesPromise().then(function(resp) {
-      console.log(resp)
       self.setState({
         spaces: resp
       })
     })
-    window.addEventListener('message', this.handleMessage, false);
 	}
 
   getSpacesPromise = () => {
@@ -181,19 +179,8 @@ class Venue extends Component {
     })
   }
 
-
-  handleMessage = (event) => {
-      if (event.origin != API.host) { return; }
-      if (event.data && event.data == 'success-event') {
-        console.log('Closing Iframe', event.data)
-        this.setState({showStatus: true}, function() {
-          this.handleClose()
-        })
-      }
-  }
-
 	goBack = () => {
-		window.history.back();
+		this.props.history.goBack();
 	}
 
 	onDateChange = (value) => {
@@ -216,9 +203,19 @@ class Venue extends Component {
 
   onFormDateChange = (type, value) => {
     switch(type) {
+      case 'dayClick':
+        if (!this.state.startDate) {
+          const startDate = new Date(value);
+          this.setState({startDate})
+        }
+        if (!this.state.endDate) {
+          const endDate = new Date(value);
+          this.setState({endDate})
+        }
+        this.onDateChange([value, value])
+        return
       case 'startDate':
         const startDate = new Date(value);
-        // const startDate = moment(value)
         this.setState({startDate})
         return
       case 'endDate':
@@ -230,35 +227,19 @@ class Venue extends Component {
 
 
   handleSubmit = (event) => {
+    const self = this;
     event.preventDefault()
-
+    console.log(this.state.checked)
     const url = '/api/events/create/'
-
     const data = new FormData(event.target);
-
-
     var object = {};
-    data.forEach(function(value, key){
-        object[key] = value;
-    });
-
-    object['venue'] = this.state.venueId
-
-    console.log(object)
-
-
-    // const startDate = moment(this.state.startDate).format()
-    // data.set('startDate', startDate);
-    // const endDate = moment(this.state.endDate).format()
-    // data.set('endDate', endDate)
-
-    // console.log(data)
-
+    data.forEach(function(value, key){object[key] = value});
+    object['venue'] = self.state.venueId
+    object['spaces'] = self.state.checked
     const postFormPromise = RestClient('POST', url, object)
     postFormPromise.then(function(resp) {
-      console.log(resp)
+      self.setState({showStatus: true, open: false})
     })
-
 
   }
 
@@ -278,8 +259,6 @@ class Venue extends Component {
 
     this.setState({
       [name]: value
-    }, function(resp) {
-      console.log(this.state)
     });
   }
 
@@ -298,9 +277,22 @@ class Venue extends Component {
 
 	}
 
-  setSelectedSpace = (space, index) => {
-    console.log(index, 'index!')
-    this.setState({selectedSpace: space, selectedIndex: index})
+  setSelectedSpace = (space, index, status) => {
+    const self = this;
+    this.setState({selectedSpace: space, selectedIndex: index}, function(resp) {
+      const { checked } = self.state;
+      const currentIndex = checked.indexOf(space);
+      const newChecked = [...checked];
+      if (status === 'BOOKED') {return;}
+      if (currentIndex === -1) {
+        newChecked.push(space);
+      } else {
+        newChecked.splice(currentIndex, 1);
+      }
+      self.setState({
+        checked: newChecked,
+      });
+    })
   }
 
 
@@ -323,8 +315,6 @@ class Venue extends Component {
 	    		  <div className="flex-item-33">
               <h2 className={classes.venueName}>{this.state.venue.name}</h2>
               <p className={classes.venueDescritpion}>{this.state.venue.address}</p>
-
-
 	    			  <p className={classes.venueDescritpion}>{this.state.venue.description}</p>
             </div>
 
@@ -337,6 +327,7 @@ class Venue extends Component {
                 tileDisabled={
                   ({activeStartDate, date, view }) => date < new Date()
                 }
+                onClickDay={( value ) => {this.onFormDateChange('dayClick', value)}}
                 selectRange={true}
                 onChange={this.onDateChange}
                 value={this.state.date}
@@ -347,8 +338,8 @@ class Venue extends Component {
               <br/>
             </div>
 
-            <div className={classes.spaceContainer + " flex-item-33"}>
 
+            <div className={classes.spaceContainer + " flex-item-33"}>
 
               {this.state.showStatus ? (
                   <div>
@@ -360,9 +351,9 @@ class Venue extends Component {
               {spaces.available || spaces.booked ? (
               <div className="align-center">
                 <h2 className={classes.spaceName}>Spaces</h2>
-                <CheckboxList data={spaces.available} setSelectedSpace={this.setSelectedSpace} status="AVAILABLE"/>
-                <CheckboxList data={spaces.booked} setSelectedSpace={this.setSelectedSpace} status="BOOKED"/>
-                <Button disabled={this.state.startDate == null} variant="contained" color="primary" aria-label="Request to Book" className={classes.button} onClick={this.requestBooking}>
+                <CheckboxList startDate={this.state.startDate} checked={this.state.checked} data={spaces.available} setSelectedSpace={this.setSelectedSpace} status="AVAILABLE"/>
+                <CheckboxList startDate={this.state.startDate} checked={this.state.checked} data={spaces.booked} setSelectedSpace={this.setSelectedSpace} status="BOOKED"/>
+                <Button disabled={this.state.checked.length == 0} variant="contained" color="primary" aria-label="Request to Book" className={classes.button} onClick={this.requestBooking}>
                   <CheckIcon className={classes.extendedIcon} />
                   Request to Book
                 </Button>

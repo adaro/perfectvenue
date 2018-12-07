@@ -90,8 +90,10 @@ a:hover, a:visited, a:link, a:active
   width: 75%;
 }
 
-.react-calendar__tile--active, .react-calendar__tile--hasActive {
-  background-color: #8247ff;
+.react-calendar__tile--active,
+.react-calendar__tile--hasActive,
+.react-calendar__tile--active {
+  background-color: #8247ff !important;
 }
 
 .react-calendar button:enabled:hover{
@@ -107,3 +109,13 @@ a:hover, a:visited, a:link, a:active
 .slick-slide img {
     display: inherit;
 }
+
+
+
+
+/* React Calendar Styles */
+
+.react-datetime-picker__wrapper {
+  border: none;
+}
+/* End React Calendae styles */

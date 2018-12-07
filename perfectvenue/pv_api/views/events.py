@@ -7,6 +7,7 @@ from perfectvenue.forms import EventCoordinatorSignUpForm
 from perfectvenue import settings
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.decorators import login_required
+from django.forms.models import model_to_dict
 
 from ..forms import EventForm
 from ..models import User, Event, Venue, Space
@@ -63,24 +64,22 @@ class CreateEventView(View):
 
         venu_obj = Venue.objects.get(id=form_object['venue'])
 
+
+
         created_event = Event.objects.create(
             user=User.objects.get(id=1), # TODO: hardcoding this for now, will need to setup Auth token first
             name=form_object['name'],
             venue=venu_obj,
             start_date=form_object['startDate'],
             end_date=form_object['endDate'],
-            # spaces=request.body['spaces'],
         )
+        for space in form_object['spaces']:
+            space_obj = Space.objects.get(id=space['id'])
+            created_event.spaces.add(space_obj)
 
-        print created_event
-
-        # event_form = EventForm(request.POST)
-        # obj = event_form.save(commit=False)
-        # obj.user = request.user
-        # obj.save()
-        # event_form.save_m2m()
-
-        return redirect("{}{}{}".format("/api/events/", created_event.id, "/created"))
+        created_event.save()
+        created_event = json.dumps({'id': created_event.id})
+        return HttpResponse(created_event, content_type="application/json")
 
 
 class CreatedEventView(View):

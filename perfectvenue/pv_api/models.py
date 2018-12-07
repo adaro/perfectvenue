@@ -5,11 +5,16 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.db.models.signals import post_save
 from django.forms.models import model_to_dict
-
 from django.dispatch import receiver
+from django.utils import timezone
+
+from datetime import timedelta
+from datetime import datetime, time
+import pprint
 
 from notifications.signals import notify
-import pprint
+
+
 
 class User(AbstractUser):
     is_event_coordinator = models.BooleanField('event coordinator status', default=False)
@@ -37,26 +42,67 @@ class Space(models.Model):
     description = models.TextField()
     photo = models.URLField(blank=True, null=True)
 
+    @classmethod
+    def daterange(cls, date1, date2):
+        for n in range(int((date2 - date1).days) + 1):
+            yield date1 + timedelta(n)
+
     # TODO: Optimize this call
     @classmethod
     def get_spaces_by_date(cls, venue_object, start_date, end_date):
-        events = Event.objects.filter(venue=venue_object, start_date__gte=start_date, end_date__lte=end_date)
+
+        starttime_object = datetime.strptime(start_date, '%Y-%m-%d')
+        endtime_object = datetime.strptime(end_date, '%Y-%m-%d')
+
+        starttime_object = timezone.make_aware(starttime_object, timezone.get_default_timezone())
+        endtime_object = timezone.make_aware(endtime_object, timezone.get_default_timezone())
+
+        events = Event.objects.filter(venue=venue_object)
         spaces = []
+        range_request = Space.daterange(starttime_object, endtime_object)
+        range_request = [dt.strftime("%Y-%m-%d") for dt in range_request]
+
         if events.exists():
             for event in events:
-                all_booked = bool(set(event.spaces.all()) == set(Space.objects.filter(venue=venue_object)))
-                available_set = list(set(Space.objects.filter(venue=venue_object)) - set(event.spaces.all()))
-                available = []
-                for i in available_set:
-                    available.append(model_to_dict(i))
-                space = {
-                    'event': event.id,
-                    'booked': list(event.spaces.all().values()),
-                    'available': available,
-                    'all_booked': all_booked,
-                 }
-                spaces.append(space)
+                range_bookings = Space.daterange(event.start_date, event.end_date)
+                range_bookings = [dt.strftime("%Y-%m-%d") for dt in range_bookings]
+
+                if set(range_bookings) & set(range_request):
+
+                    all_booked = bool(set(event.spaces.all()) == set(Space.objects.filter(venue=venue_object)))
+                    available_set = list(set(Space.objects.filter(venue=venue_object)) - set(event.spaces.all()))
+                    available = []
+                    for i in available_set:
+                        available.append(model_to_dict(i))
+                    space = {
+                        'event': event.id,
+                        'booked': list(event.spaces.all().values()),
+                        'available': available,
+                        'all_booked': all_booked,
+                    }
+                    spaces.append(space)
+
+                if starttime_object.strftime("%Y-%m-%d") in range_bookings:
+
+                    all_booked = bool(set(event.spaces.all()) == set(Space.objects.filter(venue=venue_object)))
+                    available_set = list(set(Space.objects.filter(venue=venue_object)) - set(event.spaces.all()))
+                    available = []
+                    for i in available_set:
+                        available.append(model_to_dict(i))
+                    space = {
+                        'event': event.id,
+                        'booked': list(event.spaces.all().values()),
+                        'available': available,
+                        'all_booked': all_booked,
+                    }
+                    spaces.append(space)
+
         else:
+            spaces_object = Space.objects.filter(venue=venue_object)
+            space = {'event': None, 'booked': [], 'available': list(spaces_object.values()), 'all_booked': False}
+            spaces.append(space)
+
+        if not spaces:
             spaces_object = Space.objects.filter(venue=venue_object)
             space = {'event': None, 'booked': [], 'available': list(spaces_object.values()), 'all_booked': False}
             spaces.append(space)
@@ -73,10 +119,7 @@ class Space(models.Model):
                 if avail not in available_spaces and avail['id'] not in booked_spaces_ids:
                     available_spaces.append(avail)
 
-        print pprint.pprint( {"booked": booked_spaces, "available": available_spaces})
         return {"booked": booked_spaces, "available": available_spaces}
-
-
 
     def __str__(self):
         return "{} - {}".format(self.venue.name, self.name)
@@ -142,7 +185,7 @@ class Event(models.Model):
 
     def __str__(self):
         if self.start_date and self.end_date:
-            return '{} ({} to {})'.format(self.name, self.start_date.date(), self.end_date.date())
+            return '{} ({} to {})'.format(self.name, self.start_date, self.end_date)
         else:
             return '{}'.format(self.name)
 
