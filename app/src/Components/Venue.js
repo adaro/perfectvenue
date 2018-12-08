@@ -331,8 +331,7 @@ class Venue extends Component {
                 tileDisabled={
                   ({activeStartDate, date, view }) => date < new Date()
                 }
-                onClickDay={( value ) => {this.onFormDateChange('dayClick', value)}}
-                selectRange={true}
+                returnValue={"range"}
                 onChange={this.onDateChange}
                 value={this.state.date}
               />
