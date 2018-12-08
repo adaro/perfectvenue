@@ -1,9 +1,8 @@
 from django.shortcuts import HttpResponse
 from django.views.generic import View
 from django.core import serializers
-
 from ..models import User
-
+import json
 
 class UnreadNotificationView(View):
     def get(self, request, user_id=None):
@@ -17,12 +16,12 @@ class UnreadNotificationView(View):
         notifications = serializers.serialize("json", request.user.notifications.unread())
         return HttpResponse(notifications, content_type="application/json")
 
-    def post(self, request):
-        # TODO: using index here but we probably want a better way to query the notification object
-        index = request.body.get('index')
-        notification_object = request.user.notifications.read()[index]
-        notification_object.mark_as_unread()
-        return HttpResponse("", content_type="application/json")
+    def put(self, request, user_id=None, notification_id=None):
+        user = User.objects.get(id=int(user_id))
+        notification_object = user.notifications.filter(id=int(notification_id))
+        print notification_object
+        notification_object[0].mark_as_read()
+        return HttpResponse(json.dumps({"success": True}), content_type="application/json")
 
 
 class ReadNotificationView(View):

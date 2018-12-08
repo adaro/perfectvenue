@@ -15,6 +15,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormGroup from '@material-ui/core/FormGroup';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
+import Badge from '@material-ui/core/Badge';
 
 import AuthClient from '../HTTP/AuthClient';
 import VenueSearch from '../Components/VenueSearch'
@@ -57,6 +58,12 @@ const styles = {
   },
   linkContainer: {
     color: 'white',
+  },
+  noNotificationsMessage: {
+    margin: 20,
+    padding: 20
+  },
+  noNotificationsMessageDiv: {
   }
 };
 
@@ -67,7 +74,8 @@ class MenuAppBar extends React.Component {
     auth: false,
     anchorEl: null,
     suggestions: [],
-    inputValue: null
+    inputValue: null,
+    notifications: null,
   };
 
   componentDidMount = () => {
@@ -82,20 +90,22 @@ class MenuAppBar extends React.Component {
     const self = this;
     getAuthPromise.then(function(resp) {
       self.setState({auth: resp.loggedIn, pvUserId: resp.userId}, function(resp) {
-        self.getMessages()
+        self.getNotifications()
       })
     })
   }
 
-  getMessages = () => {
+  getNotifications = () => {
+    const self = this;
     if (this.state.pvUserId ) {
       const getMessagesPromise = RestClient('GET', '/api/notifications/' + this.state.pvUserId + '/unread')
       getMessagesPromise.then(function(resp) {
-        console.log(resp)
+        self.setState({notifications: resp})
       })
     }
-
   }
+
+
 
   handleMessage = (event) => {
       if (event.origin != API.host) { return; }
@@ -114,8 +124,19 @@ class MenuAppBar extends React.Component {
     this.setState({ anchorEl: event.currentTarget });
   };
 
-  handleClose = () => {
+  handleClose = (value) => {
+    if (value && value.fields) {
+      const url = "/venues/" + value.fields.verb.split('/')[1].split('-')[0].trim() + "/events/" + value.fields.verb.split('/')[1].split('-')[1]
+      // todo send notification put request to mark as read
+      const putMessagesPromise = RestClient('PUT', '/api/notifications/' + this.state.pvUserId + '/unread/' + value.pk + '/')
+      putMessagesPromise.then(function(resp) {
+        console.log(resp)
+      })
+      this.props.history.push(url)
+    }
+
     this.setState({ anchorEl: null });
+
   };
 
   searchVenue = (value) => {
@@ -129,6 +150,61 @@ class MenuAppBar extends React.Component {
     return
   }
 
+  renderNotifications = () => {
+    const { classes } = this.props;
+    if (this.state.notifications && this.state.notifications.length) {
+      return (
+        <div className={classes.noNotificationsMessage}>
+          {this.state.notifications.map((value, index) => (
+            <MenuItem onClick={this.handleClose.bind(this, value)}>{value.fields.verb.split('/')[0]}</MenuItem>
+          ))}
+        </div>
+      )
+    }
+    else {
+      return (
+        <div className={classes.noNotificationsMessage}>
+          <div> You have no unread notifications. </div>
+          <br/>
+          <Link to="/notifications"> <div> View All Notifications </div> </Link>
+        </div>
+      )
+    }
+  }
+
+  renderIconButton = () => {
+    const { classes } = this.props;
+    const { auth, anchorEl } = this.state;
+    const open = Boolean(anchorEl);
+    if (this.state.notifications && this.state.notifications.length) {
+      return (
+
+          <IconButton
+              className={classes.accountIcon}
+              aria-owns={open ? 'menu-appbar' : null}
+              aria-haspopup="true"
+              onClick={this.handleMenu}
+              color="inherit"
+            >
+              <Badge className={classes.badge} badgeContent={this.state.notifications.length} color="secondary"><AccountCircle /></Badge>
+            </IconButton>
+
+      )
+    }
+    else {
+      return (
+          <IconButton
+              className={classes.accountIcon}
+              aria-owns={open ? 'menu-appbar' : null}
+              aria-haspopup="true"
+              onClick={this.handleMenu}
+              color="inherit"
+            >
+              <AccountCircle />
+            </IconButton>
+      )
+    }
+  }
 
   render() {
     const { classes } = this.props;
@@ -172,15 +248,7 @@ class MenuAppBar extends React.Component {
 
               </div>
 
-              <IconButton
-                    className={classes.accountIcon}
-                    aria-owns={open ? 'menu-appbar' : null}
-                    aria-haspopup="true"
-                    onClick={this.handleMenu}
-                    color="inherit"
-                  >
-                    <AccountCircle />
-                  </IconButton>
+                {this.renderIconButton()}
                   <Menu
                     id="menu-appbar"
                     anchorEl={anchorEl}
@@ -195,9 +263,8 @@ class MenuAppBar extends React.Component {
                     open={open}
                     onClose={this.handleClose}
                   >
-                    <Link to="/" className={classes.menuLink}><MenuItem onClick={this.handleClose}>Account</MenuItem></Link>
-                    <Link to="/notifications" className={classes.menuLink} ><MenuItem onClick={this.handleClose}>Messages</MenuItem></Link>
-                    <Link className={classes.link} to="/venues/new/add"><MenuItem onClick={this.handleClose}>Add Venue</MenuItem></Link>
+
+                    {this.renderNotifications()}
                   </Menu>
 
             </Toolbar>

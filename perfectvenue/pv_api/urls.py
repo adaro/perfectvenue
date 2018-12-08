@@ -21,6 +21,7 @@ urlpatterns = [
 
     url('notifications/unread/$', notifications.UnreadNotificationView.as_view(), name='notifications.unread'),
     url('notifications/(?P<user_id>\w+)/unread/$', notifications.UnreadNotificationView.as_view(), name='notification.unread'),
+    url('notifications/(?P<user_id>\w+)/unread/(?P<notification_id>\w+)/$', csrf_exempt(notifications.UnreadNotificationView.as_view()), name='notification.markread'),
     url('notifications/read/$', notifications.ReadNotificationView.as_view(), name='notifications.read'),
     url('notifications/(?P<user_id>\w+)/read/$', notifications.ReadNotificationView.as_view(), name='notification.read'),
 ]

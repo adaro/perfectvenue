@@ -12,8 +12,8 @@ class SpaceView(View):
     def get(self, request, space_id=None):
         if request.GET.get('venue'):
             venue_object = Venue.objects.get(id=request.GET.get('venue'))  # TODO: handle does not exists here
-            if request.GET.get('start_date') and request.GET.get('end_date'):
-                spaces = Space.get_spaces_by_date(venue_object, request.GET.get('start_date'), request.GET.get('end_date'))
+            if request.GET.get('start_date'):
+                spaces = Space.get_spaces_by_date(venue_object, request.GET.get('start_date'), request.GET.get('duration'))
                 return HttpResponse(json.dumps(spaces), content_type="application/json")
 
             spaces = {'available': [], 'booked': []}

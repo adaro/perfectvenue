@@ -34,6 +34,7 @@ class CheckboxList extends React.Component {
     const { classes, data, status, setSelectedSpace, checkSelectedSpace } = this.props;
     if (value.status) {
       return (
+        <div>
           <ListItem key={value.obj.name} role={undefined} dense button onClick={setSelectedSpace.bind(this, value.obj, index, value.status)}>
            <ListItemAvatar>
               <Avatar alt="S" src={value.obj.photo} />
@@ -43,13 +44,13 @@ class CheckboxList extends React.Component {
             </ListItemSecondaryAction>
              <Checkbox
                 onClick={this.props.checkSelectedSpace.bind(this, value.obj, value.status)}
-                disabled={this.props.startDate == null}
+                disabled={this.props.duration == null || this.props.startDate == null || value.status == "BOOKED"}
                 checked={this.props.checked.indexOf(value.obj) !== -1}
                 tabIndex={-1}
                 disableRipple={true}
-                disabled={value.status == "BOOKED"}
               />
           </ListItem>
+        </div>
       )
     }
 

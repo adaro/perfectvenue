@@ -8,6 +8,7 @@ from perfectvenue import settings
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.decorators import login_required
 from django.forms.models import model_to_dict
+from datetime import timedelta
 
 from ..forms import EventForm
 from ..models import User, Event, Venue, Space
@@ -57,21 +58,27 @@ class CreateEventView(View):
         })
 
     def post(self, request):
+        from dateutil.parser import parse
         print 'posting to event'
         form_object = json.loads(request.body)['params']
+
+        print form_object
+
+        end_time = parse(form_object['startDate']) + timedelta(minutes=form_object['duration'])
+
+
         # TODO: get spaces and get m2m ids
         # TODO: get user instance from Auth token
 
         venu_obj = Venue.objects.get(id=form_object['venue'])
-
-
-
         created_event = Event.objects.create(
             user=User.objects.get(id=1), # TODO: hardcoding this for now, will need to setup Auth token first
             name=form_object['name'],
             venue=venu_obj,
             start_date=form_object['startDate'],
-            end_date=form_object['endDate'],
+            end_date=end_time,
+            num_guests=form_object['guests'],
+            notes=form_object['notes'],
         )
         for space in form_object['spaces']:
             space_obj = Space.objects.get(id=space['id'])

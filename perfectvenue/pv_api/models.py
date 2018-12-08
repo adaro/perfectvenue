@@ -49,26 +49,39 @@ class Space(models.Model):
 
     # TODO: Optimize this call
     @classmethod
-    def get_spaces_by_date(cls, venue_object, start_date, end_date):
+    def get_spaces_by_date(cls, venue_object, start_date, duration):
+        from dateutil.parser import parse
+        import pytz
+        print start_date, '99'
 
-        starttime_object = datetime.strptime(start_date, '%Y-%m-%d')
-        endtime_object = datetime.strptime(end_date, '%Y-%m-%d')
+        if duration == 'null':
+            duration = 1
 
-        starttime_object = timezone.make_aware(starttime_object, timezone.get_default_timezone())
-        endtime_object = timezone.make_aware(endtime_object, timezone.get_default_timezone())
+        print duration
+
+        starttime_object = parse(str(start_date))
+        endtime_object = parse(str(start_date)) + timedelta(minutes=int(duration))
+
+
+        # starttime_object = datetime.strptime(start_date, '%Y-%m-%d')
+        # endtime_object = datetime.strptime(end_date, '%Y-%m-%d')
+
+        # starttime_object = timezone.make_aware(starttime_object, timezone.get_default_timezone())
+        # endtime_object = timezone.make_aware(endtime_object, timezone.get_default_timezone())
 
         events = Event.objects.filter(venue=venue_object)
         spaces = []
-        range_request = Space.daterange(starttime_object, endtime_object)
-        range_request = [dt.strftime("%Y-%m-%d") for dt in range_request]
+        # range_request = Space.daterange(starttime_object, endtime_object)
+        # range_request = [dt.strftime("%Y-%m-%d %H:%M") for dt in range_request]
+
+        # print range_request
 
         if events.exists():
             for event in events:
-                range_bookings = Space.daterange(event.start_date, event.end_date)
-                range_bookings = [dt.strftime("%Y-%m-%d") for dt in range_bookings]
 
-                if set(range_bookings) & set(range_request):
-
+                print starttime_object, event.start_date, event.end_date
+                if event.status != 'DC' and event.start_date.astimezone(pytz.utc) <= starttime_object <= event.end_date.astimezone(pytz.utc) or \
+                    event.start_date.astimezone(pytz.utc) <= starttime_object + timedelta(minutes=int(duration)) <= event.end_date.astimezone(pytz.utc):
                     all_booked = bool(set(event.spaces.all()) == set(Space.objects.filter(venue=venue_object)))
                     available_set = list(set(Space.objects.filter(venue=venue_object)) - set(event.spaces.all()))
                     available = []
@@ -82,20 +95,39 @@ class Space(models.Model):
                     }
                     spaces.append(space)
 
-                if starttime_object.strftime("%Y-%m-%d") in range_bookings:
-
-                    all_booked = bool(set(event.spaces.all()) == set(Space.objects.filter(venue=venue_object)))
-                    available_set = list(set(Space.objects.filter(venue=venue_object)) - set(event.spaces.all()))
-                    available = []
-                    for i in available_set:
-                        available.append(model_to_dict(i))
-                    space = {
-                        'event': event.id,
-                        'booked': list(event.spaces.all().values()),
-                        'available': available,
-                        'all_booked': all_booked,
-                    }
-                    spaces.append(space)
+                # range_bookings = Space.daterange(event.start_date, event.end_date)
+                # range_bookings = [dt.strftime("%Y-%m-%d %H:%M") for dt in range_bookings]
+                #
+                # if set(range_bookings) & set(range_request):
+                #
+                #     all_booked = bool(set(event.spaces.all()) == set(Space.objects.filter(venue=venue_object)))
+                #     available_set = list(set(Space.objects.filter(venue=venue_object)) - set(event.spaces.all()))
+                #     available = []
+                #     for i in available_set:
+                #         available.append(model_to_dict(i))
+                #     space = {
+                #         'event': event.id,
+                #         'booked': list(event.spaces.all().values()),
+                #         'available': available,
+                #         'all_booked': all_booked,
+                #     }
+                #     spaces.append(space)
+                #
+                # print starttime_object.strftime("%Y-%m-%d %H:%M"), range_bookings
+                # if starttime_object.strftime("%Y-%m-%d %H:%M") in range_bookings:
+                #
+                #     all_booked = bool(set(event.spaces.all()) == set(Space.objects.filter(venue=venue_object)))
+                #     available_set = list(set(Space.objects.filter(venue=venue_object)) - set(event.spaces.all()))
+                #     available = []
+                #     for i in available_set:
+                #         available.append(model_to_dict(i))
+                #     space = {
+                #         'event': event.id,
+                #         'booked': list(event.spaces.all().values()),
+                #         'available': available,
+                #         'all_booked': all_booked,
+                #     }
+                #     spaces.append(space)
 
         else:
             spaces_object = Space.objects.filter(venue=venue_object)
@@ -136,6 +168,7 @@ class Event(models.Model):
     name = models.CharField(max_length=200)
     venue = models.ForeignKey(Venue, on_delete=models.CASCADE)
     spaces = models.ManyToManyField(Space)
+    num_guests = models.IntegerField(default=1)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
     notes = models.TextField(blank=True, null=True)
@@ -144,7 +177,7 @@ class Event(models.Model):
 
     def get_json(self):
         return {
-            'id': self.id,
+            'id': self.pk,
             'name': self.name,
             'user': self.user.email,
             'venue': self.venue.id,
@@ -193,9 +226,10 @@ class Event(models.Model):
 @receiver(post_save, sender=Event, dispatch_uid="event_created")
 def send_notification(sender, instance, created, **kwargs):
     # syntax - notify.send(actor, recipient, verb, action_object, target, level, description, public, timestamp, **kwargs)
+    # TODO: look into setting content type field on the notification rather than using str sub
     if created:
         print 'Created Event. Sending Message to Event Coordinator'
-        notify.send(instance, recipient=instance.venue.coordinators.all(), verb='{} requested a booking'.format(instance.user.username))
+        notify.send(instance, recipient=instance.venue.coordinators.all(), verb='{} requested a booking / {}-{}'.format(instance.user.username, instance.venue.id, instance.id))
     else:
         print 'Updated Event. Sending Message to Event Coordinator'
-        notify.send(instance, recipient=instance.coordinators.all(), verb='{} updated a booking'.format(instance.user.username))
+        notify.send(instance, recipient=instance.coordinators.all(), verb='{} updated a booking / {}-{}'.format(instance.user.username, instance.venue.id, instance.id))

@@ -20,7 +20,7 @@ class Main extends Component {
     return (
       <Router history={history}>
         <div className="Main">
-           <Header/>
+           <Header history={history}/>
            <Route exact path='/' component={Home}/>
            <Route exact path='/venues/new/add' component={(props) => <AddVenue {...props} open={true} />}/>
            <Route exact path='/venues/:id' component={Venue}/>

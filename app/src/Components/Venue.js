@@ -3,9 +3,11 @@ import {
   Link
 } from 'react-router-dom'
 import Calendar from 'react-calendar'
+import DateTimePicker from 'react-datetime-picker';
 import RestClient from '../HTTP/RestClient';
 import { withStyles } from '@material-ui/core/styles';
 import BackIcon from '@material-ui/icons/ArrowBack';
+import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import CheckIcon from '@material-ui/icons/Check';
 import Iframe from 'react-iframe'
@@ -15,6 +17,14 @@ import VenueCarousel from './Carousel'
 import AddEvent from '../Views/AddEvent'
 import moment from 'moment'
 import PerfectvenueGlobals from '../PerfectvenueGlobals'
+import FormLabel from '@material-ui/core/FormLabel';
+import FormControl from '@material-ui/core/FormControl';
+import FormGroup from '@material-ui/core/FormGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import FormHelperText from '@material-ui/core/FormHelperText';
+import Select from '@material-ui/core/Select';
+
 const API = PerfectvenueGlobals.defaultProps.PROD;
 
 const styles = theme => ({
@@ -29,6 +39,14 @@ const styles = theme => ({
     backgroundColor: theme.palette.background.paper,
     boxShadow: theme.shadows[5],
     // padding: theme.spacing.unit * 4,
+  },
+  textField: {
+    marginLeft: theme.spacing.unit,
+    marginRight: theme.spacing.unit,
+    width: '90%',
+    textAlign: 'left',
+    marginBottom: 20,
+    marginTop: 20
   },
   flex: {
   	display: 'flex',
@@ -55,12 +73,7 @@ const styles = theme => ({
     left: 35,
     cursor: 'pointer'
   },
-  bookingContainer: {
-  	marginRight: '5%',
-  	display: 'flex',
-  	flexDirection: 'column',
 
-  },
   button: {
   	marginTop: 20,
 		marginBottom: 20,
@@ -118,7 +131,6 @@ class Venue extends Component {
 		venue: null,
 		loading: true,
 		startDate: null,
-		endDate: null,
 		open: false,
 		spaces: [],
     images: [],
@@ -126,6 +138,9 @@ class Venue extends Component {
     selectedSpace: null,
     selectedIndex: 0,
     checked: [],
+    duration: null,
+    numGuests: 1,
+    notes: ''
 	}
 
 
@@ -181,22 +196,20 @@ class Venue extends Component {
 		this.props.history.goBack();
 	}
 
-	onDateChange = (value) => {
-    var startDateJS = new Date(value[0]);
-    const startDate = moment(startDateJS).format()
-    var endDateJS = new Date(value[1]);
-    const endDate = moment(endDateJS).format()
 
-		const url = '/api/spaces/' +
-    	'?venue=' + this.state.venueId + '&start_date=' +
-    	startDate.toString().split('T')[0] + '&end_date=' +
-    	endDate.toString().split('T')[0]
+	onDateChange = (value) => {
+    const self = this;
+    var startDateJS = new Date(value);
+    const startDate = moment(new Date(value + ' UTC')).utc().format()
+
+    const url = '/api/spaces/' +
+     '?venue=' + this.state.venueId + '&start_date=' +
+     startDate + '&duration=' + this.state.duration
 
     const getSpacesPromise = RestClient('GET', url)
-    const self = this;
     getSpacesPromise.then(function(resp) {
       self.formatSpaces(resp)
-      self.setState({startDate: startDateJS, endDate: endDateJS})
+      self.setState({startDate: startDate, startDateForm: startDateJS})
     })
 	}
 
@@ -235,6 +248,8 @@ class Venue extends Component {
     data.forEach(function(value, key){object[key] = value});
     object['venue'] = self.state.venueId
     object['spaces'] = self.state.checked
+    object['duration'] = self.state.duration
+    object['startDate'] = self.state.startDateForm
     const postFormPromise = RestClient('POST', url, object)
     postFormPromise.then(function(resp) {
       self.setState({showStatus: true, open: false})
@@ -269,8 +284,8 @@ class Venue extends Component {
           name: '',
           venue: this.state.venue,
           spaces: this.state.spaces,
-          startDate: this.state.startDate,
-          endDate: this.state.endDate
+          startDate: this.state.startDateForm,
+          duration: this.state.duration
         }}/>
 			)
 
@@ -299,9 +314,37 @@ class Venue extends Component {
       });
   }
 
+  handleDurationChange = (event) => {
+    const self = this;
+    const url = '/api/spaces/' +
+     '?venue=' + this.state.venueId + '&start_date=' +
+     this.state.startDate + '&duration=' + event.target.value
+
+    const getSpacesPromise = RestClient('GET', url)
+    getSpacesPromise.then(function(resp) {
+      self.formatSpaces(resp)
+    })
+
+
+    this.setState({duration: event.target.value})
+  }
+
 
   render() {
     // <img src={'https://via.placeholder.com/1200x300'}/>
+
+    // <Calendar
+      // tileDisabled={({activeStartDate, date, view }) => date.getDay() === 0}
+    //   utcOffset={0}
+    //   className={classes.calendar}
+    //   tileDisabled={
+    //     ({activeStartDate, date, view }) => date < new Date()
+    //   }
+    //   onClickDay={( value ) => {this.onFormDateChange('dayClick', value)}}
+    //   onChange={this.onDateChange}
+    //   value={this.state.date}
+    // />
+
   	const { classes } = this.props
   	const { loading, spaces } = this.state
     return (
@@ -316,34 +359,16 @@ class Venue extends Component {
 
 	    		<div className="flex">
 
-	    		  <div className="flex-item-33">
+	    		  <div className="flex-item-60">
               <h2 className={classes.venueName}>{this.state.venue.name}</h2>
               <p className={classes.venueDescritpion}>{this.state.venue.address}</p>
 	    			  <p className={classes.venueDescritpion}>{this.state.venue.description}</p>
-            </div>
-
-
-            <div classes={classes.bookingContainer + " flex-item-33"}>
-              <Calendar
-                // tileDisabled={({activeStartDate, date, view }) => date.getDay() === 0}
-                utcOffset={0}
-                className={classes.calendar}
-                tileDisabled={
-                  ({activeStartDate, date, view }) => date < new Date()
-                }
-                onClickDay={( value ) => {this.onFormDateChange('dayClick', value)}}
-                selectRange={true}
-                onChange={this.onDateChange}
-                value={this.state.date}
-              />
-
               <br/>
               <Link className={classes.viewEventsLink} to={"/venues/" + this.props.match.params.id + "/events/"}>View All Events</Link>
-              <br/>
             </div>
 
 
-            <div className={classes.spaceContainer + " flex-item-33"}>
+            <div className={classes.spaceContainer + " flex-item-40"}>
 
               {this.state.showStatus ? (
                   <div>
@@ -352,10 +377,64 @@ class Venue extends Component {
                   </div>
                 ): null}
 
+
+              <div classes={"pv-border flex-item-25"}>
+                <h2 className={classes.spaceName}>Event Details</h2>
+
+                <FormGroup className={classes.textField}>
+                  <FormLabel component="legend">Start Time</FormLabel>
+                  <DateTimePicker utcOffset={0} name="startDate" onChange={this.onDateChange} value={this.state.startDateForm}/>
+                </FormGroup>
+
+                <FormGroup className={classes.textField}>
+                  <FormLabel component="legend">Duration</FormLabel>
+                   <Select
+
+                      value={this.state.duration}
+                      onChange={this.handleDurationChange}
+                      inputProps={{
+                        name: 'duration',
+                        id: 'duration-simple',
+                      }}
+                    >
+                    <MenuItem value={30}>
+                      <em>Duration</em>
+                    </MenuItem>
+                    <MenuItem value={30}>0:30 minutes</MenuItem>
+                    <MenuItem value={60}>1:00 hour</MenuItem>
+                    <MenuItem value={90}>1:30 hours</MenuItem>
+                    <MenuItem value={120}>2:00 hours</MenuItem>
+                    <MenuItem value={150}>2:30 hours</MenuItem>
+                    <MenuItem value={180}>3:00 hours</MenuItem>
+                    <MenuItem value={210}>3:30 hours</MenuItem>
+                    <MenuItem value={240}>4:00 hours</MenuItem>
+                    <MenuItem value={270}>4:30 hours</MenuItem>
+                    <MenuItem value={300}>5:00 hours</MenuItem>
+                    <MenuItem value={330}>5:30 hours</MenuItem>
+                    <MenuItem value={360}>6:00 hours</MenuItem>
+                    <MenuItem value={390}>6:30 hours</MenuItem>
+                    <MenuItem value={420}>7:00 hours</MenuItem>
+                    <MenuItem value={450}>7:30 hours</MenuItem>
+                    <MenuItem value={480}>8:00 hours</MenuItem>
+                    <MenuItem value={510}>8:30 hours</MenuItem>
+                    <MenuItem value={540}>9:00 hours</MenuItem>
+                    <MenuItem value={570}>9:30 hours</MenuItem>
+                    <MenuItem value={600}>10:00 hours</MenuItem>
+                    <MenuItem value={630}>10:30 hours</MenuItem>
+                    <MenuItem value={660}>11:00 hours</MenuItem>
+                    <MenuItem value={690}>11:30 hours</MenuItem>
+                    <MenuItem value={720}>12:00 hours</MenuItem>
+                  </Select>
+                </FormGroup>
+
+                <br/>
+
+              </div>
+
               {spaces ? (
               <div className="align-center">
                 <h2 className={classes.spaceName}>Spaces</h2>
-                <CheckboxList startDate={this.state.startDate} checked={this.state.checked} data={spaces} setSelectedSpace={this.setSelectedSpace} checkSelectedSpace={this.checkSelectedSpace}/>
+                <CheckboxList startDate={this.state.startDate} duration={this.state.duration} checked={this.state.checked} data={spaces} setSelectedSpace={this.setSelectedSpace} checkSelectedSpace={this.checkSelectedSpace}/>
                 <Button disabled={this.state.checked.length == 0} variant="contained" color="primary" aria-label="Request to Book" className={classes.button} onClick={this.requestBooking}>
                   <CheckIcon className={classes.extendedIcon} />
                   Request to Book

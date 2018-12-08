@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { withRouter } from 'react-router-dom'
-import { browserHistory } from 'react-router'
 import TextField from '@material-ui/core/TextField';
 import DateTimePicker from 'react-datetime-picker';
 import { withStyles } from '@material-ui/core/styles';
@@ -77,15 +75,32 @@ class AddEvent extends Component {
                   margin="normal"
                 />
 
-                <FormGroup className={classes.textField}>
-                  <FormLabel component="legend">Start Date</FormLabel>
-                  <DateTimePicker name="startDate" onChange={this.props.onFormDateChange.bind(this, 'startDate')} value={this.props.booking.startDate}/>
-                </FormGroup>
-                <FormGroup className={classes.textField}>
-                  <FormLabel component="legend">End Date</FormLabel>
-                  <DateTimePicker name="endDate" onChange={this.props.onFormDateChange.bind(this, 'endDate')} value={this.props.booking.endDate}/>
-                </FormGroup>
-                <Button type="submit" className={classes.textField} variant="contained" color="primary">Request Booking</Button>
+                <TextField
+                  id="event-guests"
+                  name="guests"
+                  type="number"
+                  label="How Many Guests?"
+                  className={classes.textField}
+                  value={this.state.numGuests}
+                  onChange={this.props.handleChange}
+                  margin="normal"
+                />
+
+                <TextField
+                  id="event-notes"
+                  name="notes"
+                  label="Notes"
+                  multiline
+                  rowsMax="4"
+                  value={this.state.notes}
+                  onChange={this.props.handleChange}
+                  className={classes.textField}
+                  margin="normal"
+                  helperText="Add some details about your event."
+                  variant="outlined"
+                />
+
+                <Button type="submit" className={classes.textField} variant="contained" color="primary">Request to Book</Button>
 
             </form>
           </div>
