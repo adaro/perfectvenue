@@ -20,12 +20,13 @@ class Main extends Component {
     return (
       <Router history={history}>
         <div className="Main">
-           <Header history={history}/>
-           <Route exact path='/' component={Home}/>
-           <Route exact path='/venues/new/add' component={(props) => <AddVenue {...props} open={true} />}/>
-           <Route exact path='/venues/:id' component={Venue}/>
-           <Route exact path='/venues/:id/events' component={Event}/>
-           <Route exact path='/venues/:id/events/:event_id' component={Event}/>
+           <Header history={history}>
+             <Route exact path='/' component={Home}/>
+             <Route exact path='/venues/new/add' component={(props) => <AddVenue {...props} open={true} />}/>
+             <Route exact path='/venues/:id' component={Venue}/>
+             <Route exact path='/venues/:id/events' component={(props) => <Event {...props}  getNotifications={this.props.getNotifications} />}/>
+             <Route exact path='/venues/:id/events/:event_id' component={Event}/>
+          </Header>
         </div>
       </Router>
     );

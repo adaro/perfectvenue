@@ -16,11 +16,15 @@ import FormGroup from '@material-ui/core/FormGroup';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import Badge from '@material-ui/core/Badge';
-
+import ListItem from '@material-ui/core/ListItem';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import ListItemText from '@material-ui/core/ListItemText';
+import CheckCircleIcon from '@material-ui/icons/CheckCircleOutline';
 import AuthClient from '../HTTP/AuthClient';
 import VenueSearch from '../Components/VenueSearch'
 import PerfectvenueGlobals from '../PerfectvenueGlobals'
 import RestClient from '../HTTP/RestClient';
+import Tooltip from '@material-ui/core/Tooltip';
 
 const setSessionKey = PerfectvenueGlobals.defaultProps.setSessionKey;
 const getParam = PerfectvenueGlobals.defaultProps.getParam;
@@ -60,14 +64,15 @@ const styles = {
     color: 'white',
   },
   noNotificationsMessage: {
-    margin: 20,
-    padding: 20
+    margin: 5,
+    padding: 5
   },
   noNotificationsMessageDiv: {
   }
 };
 
 
+const NotificationContext = React.createContext();
 
 class MenuAppBar extends React.Component {
   state = {
@@ -79,6 +84,7 @@ class MenuAppBar extends React.Component {
   };
 
   componentDidMount = () => {
+
 
     // TODO: Get All Auth stuff into a wrapper compoenent?
     window.addEventListener('message', this.handleMessage, false);
@@ -100,12 +106,13 @@ class MenuAppBar extends React.Component {
     if (this.state.pvUserId ) {
       const getMessagesPromise = RestClient('GET', '/api/notifications/' + this.state.pvUserId + '/unread')
       getMessagesPromise.then(function(resp) {
-        self.setState({notifications: resp})
+        self.setState({notifications: resp}, function() {
+
+        })
+
       })
     }
   }
-
-
 
   handleMessage = (event) => {
       if (event.origin != API.host) { return; }
@@ -124,19 +131,26 @@ class MenuAppBar extends React.Component {
     this.setState({ anchorEl: event.currentTarget });
   };
 
-  handleClose = (value) => {
+  handleViewNotification = (value) => {
     if (value && value.fields) {
       const url = "/venues/" + value.fields.verb.split('/')[1].split('-')[0].trim() + "/events/" + value.fields.verb.split('/')[1].split('-')[1]
-      // todo send notification put request to mark as read
+      this.props.history.push(url)
+      this.setState({ anchorEl: null });
+    }
+  }
+
+  handleClose = (event, value) => {
+    console.log(event)
+    event.stopPropagation()
+    var self = this;
+    if (value && value.fields) {
       const putMessagesPromise = RestClient('PUT', '/api/notifications/' + this.state.pvUserId + '/unread/' + value.pk + '/')
       putMessagesPromise.then(function(resp) {
-        console.log(resp)
+        console.log(1)
+        self.getNotifications()
       })
-      this.props.history.push(url)
     }
-
     this.setState({ anchorEl: null });
-
   };
 
   searchVenue = (value) => {
@@ -156,7 +170,20 @@ class MenuAppBar extends React.Component {
       return (
         <div className={classes.noNotificationsMessage}>
           {this.state.notifications.map((value, index) => (
-            <MenuItem onClick={this.handleClose.bind(this, value)}>{value.fields.verb.split('/')[0]}</MenuItem>
+
+            <ListItem key={value} role={undefined} dense button onClick={this.handleViewNotification.bind(this, value)}>
+
+              <ListItemText primary={`${value.fields.verb.split('/')[0]} `} />
+              <Tooltip title="Mark as read">
+                <ListItemSecondaryAction>
+                  <IconButton aria-label="Comments" onClick={event => this.handleClose(event, value)}  >
+                    <CheckCircleIcon style={{ fontSize: 17 }}/>
+                  </IconButton>
+                </ListItemSecondaryAction>
+              </Tooltip>
+            </ListItem>
+
+
           ))}
         </div>
       )
@@ -269,6 +296,15 @@ class MenuAppBar extends React.Component {
 
             </Toolbar>
           </AppBar>
+
+          <NotificationContext.Provider
+              value={{
+                  state: this.state,
+                  getNotifications: this.getNotifications,
+              }}>
+            {this.props.children}
+          </NotificationContext.Provider>
+
         </div>
 
     );
@@ -278,5 +314,5 @@ class MenuAppBar extends React.Component {
 MenuAppBar.propTypes = {
   classes: PropTypes.object.isRequired,
 };
-
+export { NotificationContext };
 export default withStyles(styles)(MenuAppBar);

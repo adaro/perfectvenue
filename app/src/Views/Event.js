@@ -13,9 +13,10 @@ import Button from '@material-ui/core/Button';
 import CheckIcon from '@material-ui/icons/Check';
 import CancelIcon from '@material-ui/icons/Cancel';
 import FilterIcon from '@material-ui/icons/FilterList';
-
+import { NotificationContext } from '../Components/Header'
 
 const API = PerfectvenueGlobals.defaultProps.PROD;
+
 
 const styles = theme => ({
   eventDetails: {
@@ -76,7 +77,7 @@ class Event extends Component {
     		self.setState({selectedEvent: resp[0]})
     	}
       else {
-      	alert('Could not find event.')
+      	console.log('Could not find event.')
       }
     })
 	}
@@ -100,11 +101,12 @@ class Event extends Component {
 		this.setState({selectedEvent: event})
 	}
 
-	updateStatus = (status) => {
+	updateStatus = (event, status, context) => {
 		var self = this;
 		const putEventStatusPromise = RestClient('PUT', '/api/events/' + this.state.selectedEvent.id + "/",  {"status": status})
 		putEventStatusPromise.then(function(resp) {
 			self.getEvent()
+			context.getNotifications()
 		})
 	}
 
@@ -224,15 +226,24 @@ class Event extends Component {
 		      		</div>
 
 		      		<div className="flex">
-					      <Button variant="contained" color="primary" aria-label="Approve" className={classes.button} onClick={() => this.updateStatus('AP')}>
-					        <CheckIcon className={classes.extendedIcon} />
-					        Approve
-					      </Button>
+      					<NotificationContext.Consumer>
+        					{context => (
+        						<div>
+						      <Button variant="contained" color="primary" aria-label="Approve" className={classes.button} onClick={event => this.updateStatus(event, 'AP', context)}>
+						        <CheckIcon className={classes.extendedIcon} />
+						        Approve
+						      </Button>
 
-					      <Button variant="contained" color="secondary" aria-label="Decline" className={classes.button} onClick={() => this.updateStatus('DC')}>
-					        <CancelIcon className={classes.extendedIcon} />
-					        Decline
-					      </Button>
+						      <Button variant="contained" color="secondary" aria-label="Decline" className={classes.button} onClick={event => this.updateStatus(event, 'DC', context)}>
+						        <CancelIcon className={classes.extendedIcon} />
+						        Decline
+						      </Button>
+						      </div>
+					      )}
+
+							</NotificationContext.Consumer>
+
+
 							</div>
 
 	      		</div> : <h3>Select Event to see it's details</h3>

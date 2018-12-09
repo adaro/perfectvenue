@@ -3,6 +3,10 @@ a:hover, a:visited, a:link, a:active
     text-decoration: none;
 }
 
+h1,h2,h3 {
+  color: #464649;
+}
+
 ::-webkit-scrollbar {
     width: 0px;  /* remove scrollbar space */
     background: transparent;  /* optional: just make scrollbar invisible */
@@ -41,8 +45,8 @@ a:hover, a:visited, a:link, a:active
   }
 }
 
-.pv-border {
-  border: solid 1px #464649;
+:focus {
+  outline: none;
 }
 
 .align-center {
@@ -126,9 +130,6 @@ a:hover, a:visited, a:link, a:active
 .slick-slide img {
     display: inherit;
 }
-
-
-
 
 /* React Calendar Styles */
 

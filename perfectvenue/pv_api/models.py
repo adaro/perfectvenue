@@ -6,11 +6,9 @@ from django.contrib.auth.models import AbstractUser
 from django.db.models.signals import post_save
 from django.forms.models import model_to_dict
 from django.dispatch import receiver
-from django.utils import timezone
-
-from datetime import timedelta
-from datetime import datetime, time
-import pprint
+from datetime import timedelta, datetime
+from dateutil.parser import parse
+import pytz
 
 from notifications.signals import notify
 
@@ -50,38 +48,26 @@ class Space(models.Model):
     # TODO: Optimize this call
     @classmethod
     def get_spaces_by_date(cls, venue_object, start_date, duration):
-        from dateutil.parser import parse
-        import pytz
-        print start_date, '99'
 
         if duration == 'null':
             duration = 1
+        try:
+            starttime_object = parse(str(start_date))
+            endtime_object = parse(str(start_date)) + timedelta(minutes=int(duration))
 
-        print duration
+        except Exception, error:
+            #TODO: handle invalid datesd
+            print error
+            starttime_object = datetime.utcnow().replace(tzinfo=pytz.utc)
 
-        starttime_object = parse(str(start_date))
-        endtime_object = parse(str(start_date)) + timedelta(minutes=int(duration))
-
-
-        # starttime_object = datetime.strptime(start_date, '%Y-%m-%d')
-        # endtime_object = datetime.strptime(end_date, '%Y-%m-%d')
-
-        # starttime_object = timezone.make_aware(starttime_object, timezone.get_default_timezone())
-        # endtime_object = timezone.make_aware(endtime_object, timezone.get_default_timezone())
-
-        events = Event.objects.filter(venue=venue_object)
         spaces = []
-        # range_request = Space.daterange(starttime_object, endtime_object)
-        # range_request = [dt.strftime("%Y-%m-%d %H:%M") for dt in range_request]
-
-        # print range_request
-
+        events = Event.objects.filter(venue=venue_object).exclude(status='DC')
+        print events
         if events.exists():
             for event in events:
-
                 print starttime_object, event.start_date, event.end_date
-                if event.status != 'DC' and event.start_date.astimezone(pytz.utc) <= starttime_object <= event.end_date.astimezone(pytz.utc) or \
-                    event.start_date.astimezone(pytz.utc) <= starttime_object + timedelta(minutes=int(duration)) <= event.end_date.astimezone(pytz.utc):
+                if event.start_date.astimezone(pytz.utc) <= starttime_object <= event.end_date.astimezone(pytz.utc) or \
+                   event.start_date.astimezone(pytz.utc) <= starttime_object + timedelta(minutes=int(duration)) <= event.end_date.astimezone(pytz.utc):
                     all_booked = bool(set(event.spaces.all()) == set(Space.objects.filter(venue=venue_object)))
                     available_set = list(set(Space.objects.filter(venue=venue_object)) - set(event.spaces.all()))
                     available = []
@@ -94,40 +80,6 @@ class Space(models.Model):
                         'all_booked': all_booked,
                     }
                     spaces.append(space)
-
-                # range_bookings = Space.daterange(event.start_date, event.end_date)
-                # range_bookings = [dt.strftime("%Y-%m-%d %H:%M") for dt in range_bookings]
-                #
-                # if set(range_bookings) & set(range_request):
-                #
-                #     all_booked = bool(set(event.spaces.all()) == set(Space.objects.filter(venue=venue_object)))
-                #     available_set = list(set(Space.objects.filter(venue=venue_object)) - set(event.spaces.all()))
-                #     available = []
-                #     for i in available_set:
-                #         available.append(model_to_dict(i))
-                #     space = {
-                #         'event': event.id,
-                #         'booked': list(event.spaces.all().values()),
-                #         'available': available,
-                #         'all_booked': all_booked,
-                #     }
-                #     spaces.append(space)
-                #
-                # print starttime_object.strftime("%Y-%m-%d %H:%M"), range_bookings
-                # if starttime_object.strftime("%Y-%m-%d %H:%M") in range_bookings:
-                #
-                #     all_booked = bool(set(event.spaces.all()) == set(Space.objects.filter(venue=venue_object)))
-                #     available_set = list(set(Space.objects.filter(venue=venue_object)) - set(event.spaces.all()))
-                #     available = []
-                #     for i in available_set:
-                #         available.append(model_to_dict(i))
-                #     space = {
-                #         'event': event.id,
-                #         'booked': list(event.spaces.all().values()),
-                #         'available': available,
-                #         'all_booked': all_booked,
-                #     }
-                #     spaces.append(space)
 
         else:
             spaces_object = Space.objects.filter(venue=venue_object)
@@ -228,7 +180,7 @@ def send_notification(sender, instance, created, **kwargs):
     # syntax - notify.send(actor, recipient, verb, action_object, target, level, description, public, timestamp, **kwargs)
     # TODO: look into setting content type field on the notification rather than using str sub
     if created:
-        print 'Created Event. Sending Message to Event Coordinator'
+        print 'Created Event. Sending Message to Venue Coordinator'
         notify.send(instance, recipient=instance.venue.coordinators.all(), verb='{} requested a booking / {}-{}'.format(instance.user.username, instance.venue.id, instance.id))
     else:
         print 'Updated Event. Sending Message to Event Coordinator'

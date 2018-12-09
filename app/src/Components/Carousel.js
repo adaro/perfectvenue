@@ -17,6 +17,7 @@ class SimpleSlider extends React.Component {
   render() {
     var settings = {
       dots: false,
+      arrows: false,
       className: "",
       // infinite: true,
       speed: 500,

@@ -68,12 +68,15 @@ const styles = theme => ({
   },
   backIcon: {
   	position: 'absolute',
-    top: 90,
+    top: 95,
     right: 0,
     left: 35,
     cursor: 'pointer'
   },
-
+  extendedIconSuccess: {
+    top: 4,
+    position: 'relative'
+  },
   button: {
   	marginTop: 20,
 		marginBottom: 20,
@@ -108,8 +111,17 @@ const styles = theme => ({
     color: 'red',
     fontSize: 10
   },
-  carousel: {
-    margin: '0 auto'
+  venueDetails: {
+    marginTop: 20,
+  },
+  bookingSuccess: {
+    textAlign: 'center',
+    marginTop: '50%',
+    margin: '0 auto',
+  },
+  bookingSuccessMessage: {
+    width: '80%',
+    margin: '0 auto',
   }
 })
 
@@ -182,7 +194,7 @@ class Venue extends Component {
     })
     console.log(arr, 54545)
     self.setState({
-      spaces: arr
+      spaces: arr.sort()
     })
   }
 
@@ -249,10 +261,11 @@ class Venue extends Component {
     object['venue'] = self.state.venueId
     object['spaces'] = self.state.checked
     object['duration'] = self.state.duration
-    object['startDate'] = self.state.startDateForm
+    object['startDate'] = self.state.startDate
     const postFormPromise = RestClient('POST', url, object)
     postFormPromise.then(function(resp) {
       self.setState({showStatus: true, open: false})
+
     })
 
   }
@@ -355,11 +368,12 @@ class Venue extends Component {
 
         <BackIcon className={classes.backIcon} onClick={this.goBack}/>
 
-        <VenueCarousel images={this.state.spaces} selectedElement={this.state.selectedIndex} className={classes.carousel}/>
+
 
 	    		<div className="flex">
 
-	    		  <div className="flex-item-60">
+	    		  <div className={`flex-item-60 ${classes.venueDetails}`}>
+              <VenueCarousel images={this.state.spaces} selectedElement={this.state.selectedIndex} className={classes.carousel}/>
               <h2 className={classes.venueName}>{this.state.venue.name}</h2>
               <p className={classes.venueDescritpion}>{this.state.venue.address}</p>
 	    			  <p className={classes.venueDescritpion}>{this.state.venue.description}</p>
@@ -371,19 +385,20 @@ class Venue extends Component {
             <div className={classes.spaceContainer + " flex-item-40"}>
 
               {this.state.showStatus ? (
-                  <div>
-                    Booking Status: <b>PENDING</b>
-                  <hr/>
+                  <div className={classes.bookingSuccess}>
+                    <h2><CheckIcon className={classes.extendedIconSuccess} /> Thank you for your reservation.</h2>
+                    <div className={classes.bookingSuccessMessage}>Your booking is currently pending review. One of our venue coordinators will reach out soon.</div>
+                    <Button variant="contained" color="primary" aria-label="Book another event" className={classes.button} onClick={() => {this.setState({showStatus: false})}} >Book another event</Button>
                   </div>
-                ): null}
+                ) : (
 
-
+             <div>
               <div classes={"pv-border flex-item-25"}>
                 <h2 className={classes.spaceName}>Event Details</h2>
 
                 <FormGroup className={classes.textField}>
                   <FormLabel component="legend">Start Time</FormLabel>
-                  <DateTimePicker utcOffset={0} name="startDate" onChange={this.onDateChange} value={this.state.startDateForm}/>
+                  <DateTimePicker disableClock={true}  utcOffset={0} name="startDate" onChange={this.onDateChange} value={this.state.startDateForm}/>
                 </FormGroup>
 
                 <FormGroup className={classes.textField}>
@@ -441,6 +456,13 @@ class Venue extends Component {
                 </Button>
               </div>
               ): <h3 style={{textAlign: 'center'}}>Select a date to start planning your event.</h3> }
+              </div>
+
+                )
+
+
+            }
+
 
             </div>
 	    		</div>
