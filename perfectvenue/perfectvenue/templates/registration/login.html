@@ -1,10 +1,18 @@
+{% extends 'base/base.html' %}
+
 {% block content %}
+<div class="centered padding-20">
+  <div class="pv-card-wide mdl-card mdl-shadow--2dp padding-20">
+    <h3>Login</h3>
   <form action=""  method="post">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit">Login</button>
+    <button type="submit" class="btn" >Login</button>
   </form>
+  <br/>
   <div id="register-link">
     <span>Or </span><a href="/accounts/select/?next={{ request.REQUEST.next|urlencode }}">Sign Up</a>
   </div>
+  </div>
+</div>
 {% endblock %}

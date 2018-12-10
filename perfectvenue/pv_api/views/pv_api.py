@@ -25,7 +25,7 @@ class AuthView(View):
         params = json.loads(request.body).get('params')
         try:
             token = Token.objects.get(key=params['pvToken'])
-            return HttpResponse(json.dumps({'loggedIn': True, 'userId': token.user.id}),
+            return HttpResponse(json.dumps({'loggedIn': True, 'userId': token.user.id, 'is_venue_coordinator': token.user.is_venue_coordinator}),
                                 content_type="application/json")
         except (Token.DoesNotExist, KeyError):
             return HttpResponse(json.dumps({'loggedIn': False}), content_type="application/json")

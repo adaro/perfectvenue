@@ -31,7 +31,7 @@ class Home extends Component {
 			)
 		}
 		else {
-			return ("Loading")
+			return null
 		}
 	}
 

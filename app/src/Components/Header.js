@@ -73,6 +73,7 @@ const styles = {
 
 
 const NotificationContext = React.createContext();
+const UserContext = React.createContext();
 
 class MenuAppBar extends React.Component {
   state = {
@@ -81,6 +82,7 @@ class MenuAppBar extends React.Component {
     suggestions: [],
     inputValue: null,
     notifications: null,
+    is_venue_coordinator: false
   };
 
   componentDidMount = () => {
@@ -95,10 +97,12 @@ class MenuAppBar extends React.Component {
     const getAuthPromise = RestClient('POST', '/accounts/auth/', {pvToken: localStorage.getItem('pvToken')})
     const self = this;
     getAuthPromise.then(function(resp) {
-      self.setState({auth: resp.loggedIn, pvUserId: resp.userId}, function(resp) {
+      console.log(resp, 'USER')
+      self.setState({auth: resp.loggedIn, pvUserId: resp.userId, is_venue_coordinator: resp.is_venue_coordinator}, function(resp) {
         self.getNotifications()
       })
     })
+
   }
 
   getNotifications = () => {
@@ -235,7 +239,7 @@ class MenuAppBar extends React.Component {
 
   render() {
     const { classes } = this.props;
-    const { auth, anchorEl } = this.state;
+    const { auth, anchorEl, is_venue_coordinator } = this.state;
     const open = Boolean(anchorEl);
 
     return (
@@ -253,9 +257,10 @@ class MenuAppBar extends React.Component {
 
             <div className={classes.container + " header-link-container"}>
 
-              <div className={classes.linkContainer}>
+              {is_venue_coordinator && (<div className={classes.linkContainer}>
                 <Link className={classes.link} to="/venues/new/add">Add Venue</Link>
               </div>
+              )}
 
               {auth && (
 
@@ -296,15 +301,18 @@ class MenuAppBar extends React.Component {
 
             </Toolbar>
           </AppBar>
-
-          <NotificationContext.Provider
-              value={{
-                  state: this.state,
-                  getNotifications: this.getNotifications,
-              }}>
-            {this.props.children}
-          </NotificationContext.Provider>
-
+          <UserContext.Provider
+                value={{
+                    state: this.state,
+                }}>
+            <NotificationContext.Provider
+                value={{
+                    state: this.state,
+                    getNotifications: this.getNotifications,
+                }}>
+              {this.props.children}
+            </NotificationContext.Provider>
+          </UserContext.Provider>
         </div>
 
     );
@@ -314,5 +322,5 @@ class MenuAppBar extends React.Component {
 MenuAppBar.propTypes = {
   classes: PropTypes.object.isRequired,
 };
-export { NotificationContext };
+export { NotificationContext, UserContext };
 export default withStyles(styles)(MenuAppBar);

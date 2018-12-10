@@ -11,6 +11,7 @@
         flex-direction: column;
         width: 50%;
         margin: 0 auto;
+        margin-top: 40px;
     }
 </style>
 
@@ -19,7 +20,7 @@
     {% csrf_token %}
     {{ form }}
     <br/>
-    <input type="submit" value="Add Venue">
+    <input type="submit" class="btn" value="Add Venue">
 </form>
 
 <script>

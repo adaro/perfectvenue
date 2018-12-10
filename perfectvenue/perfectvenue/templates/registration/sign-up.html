@@ -15,20 +15,33 @@
 {% endif %}
 
 {% if view.user_type == None %}
-    <div id="pv-sign-up">
-        <h1>Sign up for a free account</h1>
-        <h3>Are you and Event Coordinator or a Venue Coordinator?</h3>
-        <div>
-            <a id="event-coord-signup-btn" href="/accounts/signup/event_coordinator/">I'm an Event Coordinator</a>
-            <a id="venue-coord-signup-btn" href="/accounts/signup/venue_coordinator/">I'm an Venue Coordinator</a>
-        </div>
-    </div>
 
-{% endif %}
-  <br>
+
+<div class="centered">
+    <div class="pv-card-wide mdl-card mdl-shadow--2dp">
+      <div class="mdl-card__title">
+        <h2 class="mdl-card__title-text">Sign up for a free account</h2>
+      </div>
+      <div class="mdl-card__supporting-text">
+        Are you hosting or planning an Event?
+      </div>
+      <div class="mdl-card__actions mdl-card--border">
+        <a href="/accounts/signup/event_coordinator/" class="mdl-button mdl-button--raised  mdl-button--colored mdl-js-buttonmdl-js-ripple-effect">
+          Planning Event
+        </a>
+        <a href="/accounts/signup/venue_coordinator/" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+          Hosting Event
+        </a>
+      </div>
+      <br>
+    </div>
+    <br/>
   <div id="register-link">
     <span>Already have an account? </span><a href="/accounts/login/">Log In</a>
   </div>
+</div>
+
+{% endif %}
 
 {% endblock %}
 

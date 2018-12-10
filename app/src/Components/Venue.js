@@ -24,6 +24,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Select from '@material-ui/core/Select';
+import { UserContext } from '../Components/Header'
 
 const API = PerfectvenueGlobals.defaultProps.PROD;
 
@@ -378,7 +379,16 @@ class Venue extends Component {
               <p className={classes.venueDescritpion}>{this.state.venue.address}</p>
 	    			  <p className={classes.venueDescritpion}>{this.state.venue.description}</p>
               <br/>
-              <Link className={classes.viewEventsLink} to={"/venues/" + this.props.match.params.id + "/events/"}>View All Events</Link>
+
+            <UserContext.Consumer>
+            {context =>
+
+                (
+                  context.state.is_venue_coordinator == true ? (<Link className={classes.viewEventsLink} to={"/venues/" + this.props.match.params.id + "/events/"}>View All Events</Link>) : null
+                )
+            }
+            </UserContext.Consumer>
+
             </div>
 
 

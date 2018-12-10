@@ -1,10 +1,31 @@
+
 {% block messages %}
     {% if message %}<div class='imp_message'>{{ message }}</div>{% endif %}
 {% endblock %}
-<form action="" method="post">
-    {% csrf_token %}
-    {{ form }}
-    <br/>
-    <input type="submit" value="Create Account">
-</form>
+<div class="centered padding-20">
+  <div class="pv-card-wide mdl-card mdl-shadow--2dp padding-20">
+    <h3>Sign Up</h3>
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ form }}
+        <br/>
+        <input type="submit"  class="btn" value="Create Account">
+    </form>
+  </div>
+</div>
 
+
+<script>
+// hack for spacing the help text element properly
+var attrs = { };
+
+$.each($(".helptext")[0].attributes, function(idx, attr) {
+    attrs[attr.nodeName] = attr.nodeValue;
+});
+
+
+$(".helptext").replaceWith(function () {
+    return $("<div /></br>", attrs).append($(this).contents());
+});
+
+</script>

@@ -28,7 +28,7 @@ const styles = theme => ({
     backgroundColor: theme.palette.background.paper,
     boxShadow: theme.shadows[5],
     // padding: theme.spacing.unit * 4,
-  },
+  }
 });
 
 class AddVenue extends Component {
@@ -77,7 +77,7 @@ class AddVenue extends Component {
           onClose={this.handleClose}
         >
           <div style={getModalStyle()} className={classes.paper}>
-          	<Iframe url={API.host + "/api/venues/add/"}
+          	<Iframe url={API.host + "/api/venues/add/"} className={classes.iframe}
 			        width="100%"
 			        height="700px"
 			        id="myId"
