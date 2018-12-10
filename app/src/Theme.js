@@ -16,14 +16,13 @@ export default createMuiTheme({
       // dark: will be calculated from palette.secondary.main,
       contrastText: '#fff',
     },
-    alert: {
-      light: '#f44336',
-      main: '#f44336',
+    error: {
+      light: '#ec407a',
+      main: '#e91e63',
       // dark: will be calculated from palette.secondary.main,
       contrastText: '#fff',
     },
 
-    // error: will use the default color
   },
 
   typography: {

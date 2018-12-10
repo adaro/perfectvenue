@@ -25,6 +25,7 @@ import VenueSearch from '../Components/VenueSearch'
 import PerfectvenueGlobals from '../PerfectvenueGlobals'
 import RestClient from '../HTTP/RestClient';
 import Tooltip from '@material-ui/core/Tooltip';
+import MessageBar from '../Components/MessageBar'
 
 const setSessionKey = PerfectvenueGlobals.defaultProps.setSessionKey;
 const getParam = PerfectvenueGlobals.defaultProps.getParam;
@@ -74,11 +75,15 @@ const styles = {
 
 const NotificationContext = React.createContext();
 const UserContext = React.createContext();
+const MessageBarContext = React.createContext();
+
 
 class MenuAppBar extends React.Component {
   state = {
     auth: false,
     anchorEl: null,
+    openMEssage: false,
+    message: '',
     suggestions: [],
     inputValue: null,
     notifications: null,
@@ -86,8 +91,6 @@ class MenuAppBar extends React.Component {
   };
 
   componentDidMount = () => {
-
-
     // TODO: Get All Auth stuff into a wrapper compoenent?
     window.addEventListener('message', this.handleMessage, false);
     const sessionUid = getParam('pvToken', window.location.href)
@@ -169,6 +172,14 @@ class MenuAppBar extends React.Component {
     return
   }
 
+  showMessageBar = (message) => {
+    this.setState({openMessage: true, message: message})
+  }
+
+  closeMessageBar = () => {
+    this.setState({openMessage: false})
+  }
+
   renderNotifications = () => {
     const { classes } = this.props;
     if (this.state.notifications && this.state.notifications.length) {
@@ -186,7 +197,6 @@ class MenuAppBar extends React.Component {
                 </ListItemSecondaryAction>
               </Tooltip>
             </ListItem>
-
 
           ))}
         </div>
@@ -301,6 +311,9 @@ class MenuAppBar extends React.Component {
 
             </Toolbar>
           </AppBar>
+
+          <MessageBar message={this.state.message} open={this.state.openMessage}/>
+
           <UserContext.Provider
                 value={{
                     state: this.state,
@@ -310,9 +323,18 @@ class MenuAppBar extends React.Component {
                     state: this.state,
                     getNotifications: this.getNotifications,
                 }}>
-              {this.props.children}
+              <MessageBarContext.Provider
+                value={{
+                    state: this.state,
+                    showMessageBar: this.showMessageBar,
+                    closeMessageBar: this.closeMessageBar
+                }}>
+                {this.props.children}
+              </MessageBarContext.Provider>
             </NotificationContext.Provider>
           </UserContext.Provider>
+
+
         </div>
 
     );
@@ -322,5 +344,5 @@ class MenuAppBar extends React.Component {
 MenuAppBar.propTypes = {
   classes: PropTypes.object.isRequired,
 };
-export { NotificationContext, UserContext };
+export { NotificationContext, UserContext, MessageBarContext };
 export default withStyles(styles)(MenuAppBar);

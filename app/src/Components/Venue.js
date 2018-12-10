@@ -458,6 +458,7 @@ class Venue extends Component {
                     <h3><CheckIcon className={classes.extendedIconSuccess} /> Thank you for your reservation.</h3>
                     <div className={classes.bookingSuccessMessage}>Your booking is currently pending review. One of our venue coordinators will reach out soon.</div>
                     <Button variant="contained" color="primary" aria-label="Book another event" className={classes.button} onClick={() => {this.setState({showStatus: false})}} >Book another event</Button>
+                    <Button variant="outline" color="secondary" aria-label="Book another event" className={classes.button} onClick={() => {this.setState({showStatus: false})}} >Book another event</Button>
                   </div>
                 ) : (
 

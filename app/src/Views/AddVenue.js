@@ -2,8 +2,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom'
 import { browserHistory } from 'react-router'
-
-
 import { withStyles } from '@material-ui/core/styles';
 import Iframe from 'react-iframe'
 import Modal from '@material-ui/core/Modal';

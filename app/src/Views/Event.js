@@ -9,12 +9,20 @@ import PerfectvenueGlobals from '../PerfectvenueGlobals'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import moment from 'moment'
 import TextField from '@material-ui/core/TextField';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import ListItemText from '@material-ui/core/ListItemText';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Button from '@material-ui/core/Button';
 import CheckIcon from '@material-ui/icons/Check';
+import CalendarIcon from '@material-ui/icons/CalendarToday';
+import NotesIcon from '@material-ui/icons/Notes';
+import StatusIcon from '@material-ui/icons/RateReview';
+
 import CancelIcon from '@material-ui/icons/Cancel';
 import FilterIcon from '@material-ui/icons/FilterList';
-import { NotificationContext } from '../Components/Header'
-import { UserContext } from '../Components/Header'
+import { NotificationContext, MessageBarContext, UserContext } from '../Components/Header'
 
 const API = PerfectvenueGlobals.defaultProps.PROD;
 
@@ -70,6 +78,12 @@ class Event extends Component {
 		this.getEvents()
 	}
 
+	// componentWillReceiveProps = (props) => {
+	// 	if (this.props.match.params.event_id) {
+	// 		this.getEvent()
+	// 	}
+	// }
+
 	getEvent = () => {
     const getEventPromise = RestClient('GET', '/api/events/' + this.props.match.params.event_id)
     const self = this;
@@ -102,12 +116,38 @@ class Event extends Component {
 		this.setState({selectedEvent: event})
 	}
 
-	updateStatus = (event, status, context) => {
+	updateStatus = (event, status, context, message) => {
 		var self = this;
 		const putEventStatusPromise = RestClient('PUT', '/api/events/' + this.state.selectedEvent.id + "/",  {"status": status})
 		putEventStatusPromise.then(function(resp) {
 			self.getEvent()
-			context.getNotifications()
+
+			if (context) {
+				context.getNotifications()
+			}
+
+			if (message) {
+
+					var longStatus = status
+					switch(status) {
+						case "PN":
+							longStatus = 'PENDING'
+							message.showMessageBar("Updated to " + longStatus)
+							return
+						case "AP":
+							longStatus = 'APPROVED'
+							message.showMessageBar("Updated to " + longStatus)
+							return
+						case "DC":
+							longStatus = 'DECLINED'
+							message.showMessageBar("Updated to " + longStatus)
+							return
+						case "CN":
+							longStatus = 'CANCELLED'
+							message.showMessageBar("Updated to " + longStatus)
+							return
+					}
+			}
 		})
 	}
 
@@ -209,46 +249,98 @@ class Event extends Component {
 	      	{ selectedEvent ?
 	      		<div>
 		      		<h2>{this.state.selectedEvent.name}</h2>
-		      		<div>Status: {this.renderStatus()}</div>
-		      		<p className={classes.eventRequestNotes}>{this.state.selectedEvent.notes}</p>
 
-		      		<div className={classes.dateContainer}>
-		      			<div>Start: <small>{moment(this.state.selectedEvent.start_date).utc().format('YYYY/MM/DD hh:mm a').toString()}</small></div>
-		      			<div>End: <small>{moment(this.state.selectedEvent.end_date).utc().format('YYYY/MM/DD hh:mm a').toString()}</small></div>
-		      		</div>
+		      		<div className={classes.venueCoordNotes}>
+           		<ListItem>
+                <ListItemIcon>
+                  <NotesIcon />
+                </ListItemIcon>
+                <ListItemText primary="Event Notes"  secondary={this.state.selectedEvent.notes}/>
+              </ListItem>
 
-		      		<UserContext.Consumer>
-		      			{user => (
-								user.state.is_venue_coordinator ?
-			      		<div className="flex">
-	      					<NotificationContext.Consumer>
-	        					{context => (
-	        					<div>
-						      		<div className={classes.venueCoordNotes}>
-						      			<TextField
-												  placeholder="My notes"
-												  multiline={true}
-												  rows={5}
-												  rowsMax={10}
-												/>
-						      		</div>
+              <ListItem>
+                <ListItemIcon>
+                  <StatusIcon />
+                </ListItemIcon>
+                <ListItemText primary="Status"  secondary={this.renderStatus()}/>
+              </ListItem>
 
-								      <Button variant="contained" color="primary" aria-label="Approve" className={classes.button} onClick={event => this.updateStatus(event, 'AP', context)}>
-								        <CheckIcon className={classes.extendedIcon} />
-								        Approve
-								      </Button>
+              <ListItem>
+                <ListItemIcon>
+                  <CalendarIcon />
+                </ListItemIcon>
+                <ListItemText primary="Start Time"  secondary={moment(this.state.selectedEvent.start_date).utc().format('YYYY/MM/DD hh:mm a').toString()}/>
+              </ListItem>
 
-								      <Button variant="contained" color="secondary" aria-label="Decline" className={classes.button} onClick={event => this.updateStatus(event, 'DC', context)}>
+              <ListItem>
+                <ListItemIcon>
+                  <CalendarIcon />
+                </ListItemIcon>
+                <ListItemText primary="End Time"  secondary={moment(this.state.selectedEvent.end_date).utc().format('YYYY/MM/DD hh:mm a').toString()}/>
+              </ListItem>
+              </div>
+
+
+		      		<MessageBarContext.Consumer>
+		      			{message => (
+								<div>
+				      		<UserContext.Consumer>
+				      			{user => (
+										user.state.is_venue_coordinator ?
+					      		<div className="flex">
+			      					<NotificationContext.Consumer>
+			        					{context => (
+			        					<div>
+
+
+							              <TextField
+							                  id="venue-notes"
+							                  name="notes"
+							                  label="Venue Notes"
+							                  multiline
+							                  rowsMax="4"
+							                  value={this.state.notes}
+							                  onChange={this.props.handleChange}
+							                  className={classes.textField}
+							                  margin="normal"
+							                  helperText="Add any additional details about the booking status."
+							                  variant="outlined"
+							                />
+
+
+										      <Button variant="contained" color="primary" aria-label="Approve" className={classes.button} onClick={event => this.updateStatus(event, 'AP', context, message)}>
+										        <CheckIcon className={classes.extendedIcon} />
+										        Approve
+										      </Button>
+
+										      <Button variant="contained" color="secondary" aria-label="Decline" className={classes.button} onClick={event => this.updateStatus(event, 'DC', context, message)}>
+										        <CancelIcon className={classes.extendedIcon} />
+										        Decline
+										      </Button>
+									      </div>
+								      )}
+										</NotificationContext.Consumer>
+									</div> : null
+
+								)}
+								</UserContext.Consumer>
+							</div>)}
+				     </MessageBarContext.Consumer>
+
+    		<MessageBarContext.Consumer>
+	      			{message => (
+							<div>
+		    					<NotificationContext.Consumer>
+				      			{context => (
+								      <Button variant="contained" color="error" style={{backgroundColor: '#e91e63', color: 'white'}} aria-label="Cancel Event" className={classes.button} onClick={event => this.updateStatus(event, 'CN', context, message)}>
 								        <CancelIcon className={classes.extendedIcon} />
-								        Decline
+								        Cancel
 								      </Button>
-							      </div>
-						      )}
-								</NotificationContext.Consumer>
-							</div> : null
+								     )}
+									</NotificationContext.Consumer>
+							</div>)}
+			   </MessageBarContext.Consumer>
 
-						)}
-						</UserContext.Consumer>
 
 	      		</div> : <h3>Select Event to see it's details</h3>
 	      	}

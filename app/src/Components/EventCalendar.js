@@ -28,8 +28,27 @@ class EventCalendar extends Component {
 				// scrollToTime={this.props.scrollToTime}
         // defaultDate={this.props.defaultDate}
 				eventPropGetter={event => {
-						if (this.props.selected && this.props.selected.name === event.name) {
+						if (this.props.selected && this.props.selected.id === event.id) {
 							const backgroundColor = "#8247ff";
+							return { style: { backgroundColor } }
+						}
+
+						if (event.status === 'AP') {
+							const backgroundColor = "#8247ff";
+							return { style: { backgroundColor } }
+						}
+
+						if (event.status === 'PN') {
+							const backgroundColor = "#618833";
+							return { style: { backgroundColor } }
+						}
+
+						if (event.status === 'DC') {
+							const backgroundColor = "#ffab68";
+							return { style: { backgroundColor } }
+						}
+						if (event.status === 'CN') {
+							const backgroundColor = "#e91e63";
 							return { style: { backgroundColor } }
 						}
 					}
