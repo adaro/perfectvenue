@@ -143,18 +143,19 @@ class MenuAppBar extends React.Component {
     }
   }
 
-  handleClose = (event, value) => {
-    console.log(event)
+  handleClose = (event, value, keepOpen) => {
     event.stopPropagation()
     var self = this;
     if (value && value.fields) {
       const putMessagesPromise = RestClient('PUT', '/api/notifications/' + this.state.pvUserId + '/unread/' + value.pk + '/')
       putMessagesPromise.then(function(resp) {
-        console.log(1)
         self.getNotifications()
       })
     }
-    this.setState({ anchorEl: null });
+    if (!keepOpen) {
+      this.setState({ anchorEl: null });
+    }
+
   };
 
   searchVenue = (value) => {
@@ -176,11 +177,10 @@ class MenuAppBar extends React.Component {
           {this.state.notifications.map((value, index) => (
 
             <ListItem key={value} role={undefined} dense button onClick={this.handleViewNotification.bind(this, value)}>
-
               <ListItemText primary={`${value.fields.verb.split('/')[0]} `} />
               <Tooltip title="Mark as read">
                 <ListItemSecondaryAction>
-                  <IconButton aria-label="Comments" onClick={event => this.handleClose(event, value)}  >
+                  <IconButton aria-label="Comments" onClick={event => this.handleClose(event, value, true)}  >
                     <CheckCircleIcon style={{ fontSize: 17 }}/>
                   </IconButton>
                 </ListItemSecondaryAction>

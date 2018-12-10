@@ -31,5 +31,12 @@ class SpaceView(View):
         return HttpResponse(spaces, content_type="application/json")
 
     def post(self, request):
-        # TODO: create form for spaces to be iframed into frontend. similar to event form.
-        pass
+        form_object = json.loads(request.body)['params']
+        venue_obj = Venue.objects.get(id=form_object['venue'])
+        Space.objects.create(venue=venue_obj, name=form_object['name'], description=form_object['description'], photo=form_object['photo'])
+        return HttpResponse(json.dumps({"success": True}), content_type="application/json")
+
+    def delete(self, request, space_id):
+        space = Space.objects.get(id=space_id)
+        space.delete()
+        return HttpResponse(json.dumps({"success": True}), content_type="application/json")

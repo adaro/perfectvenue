@@ -13,10 +13,13 @@ urlpatterns = [
 
     url('venues/add/$', venues.AddVenue.as_view(), name='venues.add'),
     url('venues/(?P<venue_id>\w+)/$', venues.VenueView.as_view(), name='venue'),
+    url('venues/(?P<venue_id>\w+)/delete/$', csrf_exempt(venues.VenueView.as_view()), name='venue.delete'),
 
     url('venues/(?P<venue_id>\w+)/$', venues.VenueView.as_view(), name='venue'),
 
     url('spaces/$', spaces.SpaceView.as_view(), name='spaces'),
+    url('spaces/create/$',  csrf_exempt(spaces.SpaceView.as_view()), name='spaces.create'),
+    url('spaces/(?P<space_id>\w+)/delete/$',  csrf_exempt(spaces.SpaceView.as_view()), name='spaces.delete'),
     url('spaces/(?P<space_id>\w+)/$', spaces.SpaceView.as_view(), name='space'),
 
     url('notifications/unread/$', notifications.UnreadNotificationView.as_view(), name='notifications.unread'),

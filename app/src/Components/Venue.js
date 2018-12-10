@@ -10,11 +10,18 @@ import BackIcon from '@material-ui/icons/ArrowBack';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import CheckIcon from '@material-ui/icons/Check';
+import AddIcon from '@material-ui/icons/Add';
+import CalendarIcon from '@material-ui/icons/CalendarToday';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import ListItemText from '@material-ui/core/ListItemText';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Iframe from 'react-iframe'
 import Modal from '@material-ui/core/Modal';
 import CheckboxList from './List'
 import VenueCarousel from './Carousel'
 import AddEvent from '../Views/AddEvent'
+import AddSpace from '../Views/AddSpace'
 import moment from 'moment'
 import PerfectvenueGlobals from '../PerfectvenueGlobals'
 import FormLabel from '@material-ui/core/FormLabel';
@@ -25,6 +32,8 @@ import MenuItem from '@material-ui/core/MenuItem';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Select from '@material-ui/core/Select';
 import { UserContext } from '../Components/Header'
+import DeleteIcon from '@material-ui/icons/DeleteOutline';
+
 
 const API = PerfectvenueGlobals.defaultProps.PROD;
 
@@ -96,7 +105,6 @@ const styles = theme => ({
     paddingBottom: 100
   },
   spaceContainer: {
-    border: "solid 1px #464649",
     padding: 16,
     textAlign: 'left',
     margin: 20,
@@ -123,6 +131,11 @@ const styles = theme => ({
   bookingSuccessMessage: {
     width: '80%',
     margin: '0 auto',
+  },
+  borderSmall: {
+    border: "solid 1px #464649",
+    padding: 8,
+    margin: 10,
   }
 })
 
@@ -145,6 +158,7 @@ class Venue extends Component {
 		loading: true,
 		startDate: null,
 		open: false,
+    openAddSpaces: false,
 		spaces: [],
     images: [],
     showStatus: false, // REMOVE - ONLY FOR DEMO PURPOSE
@@ -250,6 +264,22 @@ class Venue extends Component {
     }
   }
 
+  handleAddSpacesSubmit = (event) => {
+    const self = this;
+    event.preventDefault()
+    const url = '/api/spaces/create/'
+    const data = new FormData(event.target);
+    var object = {};
+    data.forEach(function(value, key){object[key] = value});
+    object['venue'] = self.state.venueId
+    const postAddSpacesFormPromise = RestClient('POST', url, object)
+    postAddSpacesFormPromise.then(function(resp) {
+      self.getSpacesPromise().then(function(resp) {
+        self.formatSpaces(resp)
+        self.setState({openAddSpaces: false})
+      })
+    })
+  }
 
   handleSubmit = (event) => {
     const self = this;
@@ -280,6 +310,10 @@ class Venue extends Component {
     this.setState({ open: false });
   };
 
+  handleCloseSpaces = () => {
+    this.setState({ openAddSpaces: false });
+  }
+
   handleFormChange = (event) => {
     const target = event.target;
     const value = target.value;
@@ -302,8 +336,15 @@ class Venue extends Component {
           duration: this.state.duration
         }}/>
 			)
-
 	}
+
+  renderAddSpaceModal = () => {
+    const { classes } = this.props;
+    const url = API.host +  "/api/events/create/?venue=" + this.state.venueId +  "&start_date=" + this.state.startDate + "&end_date=" + this.state.endDate
+    return (
+        <AddSpace handleClose={this.handleCloseSpaces} open={this.state.openAddSpaces}  handleSubmit={this.handleAddSpacesSubmit}/>
+      )
+  }
 
   setSelectedSpace = (space, index, status) => {
     const self = this;
@@ -313,7 +354,8 @@ class Venue extends Component {
     })
   }
 
-  checkSelectedSpace = (space, status) => {
+  checkSelectedSpace = (event, space, status) => {
+      event.stopPropagation()
       const { checked } = this.state;
       const currentIndex = checked.indexOf(space);
       const newChecked = [...checked];
@@ -339,8 +381,35 @@ class Venue extends Component {
       self.formatSpaces(resp)
     })
 
-
     this.setState({duration: event.target.value})
+  }
+
+  onVenueDelete = () => {
+    const self = this;
+    var url = '/api/venues/' + this.state.venueId + '/delete/'
+    const deleteVenuePromise = RestClient('DELETE', url)
+    var confirmDelete = window.confirm("Are you sure you want to remove Venue?");
+    if (confirmDelete) {
+      deleteVenuePromise.then(function(resp) {
+        self.props.history.push('/')
+      })
+    }
+  }
+
+  onSpaceDelete = (event, spaceId, venueId) => {
+    event.stopPropagation()
+    console.log(spaceId)
+    const self = this;
+    var confirmDelete = window.confirm("Are you sure you want to remove space?");
+    if (confirmDelete) {
+      var url = '/api/spaces/' + spaceId + '/delete/'
+      const deleteSpacePromise = RestClient('DELETE', url)
+      deleteSpacePromise.then(function(resp) {
+        self.getSpacesPromise().then(function(resp) {
+          self.formatSpaces(resp)
+        })
+      })
+    }
   }
 
 
@@ -375,20 +444,10 @@ class Venue extends Component {
 
 	    		  <div className={`flex-item-60 ${classes.venueDetails}`}>
               <VenueCarousel images={this.state.spaces} selectedElement={this.state.selectedIndex} className={classes.carousel}/>
-              <h2 className={classes.venueName}>{this.state.venue.name}</h2>
+              <h3 className={classes.venueName}>{this.state.venue.name}</h3>
               <p className={classes.venueDescritpion}>{this.state.venue.address}</p>
 	    			  <p className={classes.venueDescritpion}>{this.state.venue.description}</p>
               <br/>
-
-            <UserContext.Consumer>
-            {context =>
-
-                (
-                  context.state.is_venue_coordinator == true ? (<Link className={classes.viewEventsLink} to={"/venues/" + this.props.match.params.id + "/events/"}>View All Events</Link>) : null
-                )
-            }
-            </UserContext.Consumer>
-
             </div>
 
 
@@ -396,16 +455,16 @@ class Venue extends Component {
 
               {this.state.showStatus ? (
                   <div className={classes.bookingSuccess}>
-                    <h2><CheckIcon className={classes.extendedIconSuccess} /> Thank you for your reservation.</h2>
+                    <h3><CheckIcon className={classes.extendedIconSuccess} /> Thank you for your reservation.</h3>
                     <div className={classes.bookingSuccessMessage}>Your booking is currently pending review. One of our venue coordinators will reach out soon.</div>
                     <Button variant="contained" color="primary" aria-label="Book another event" className={classes.button} onClick={() => {this.setState({showStatus: false})}} >Book another event</Button>
                   </div>
                 ) : (
 
              <div>
-              <div classes={"pv-border flex-item-25"}>
-                <h2 className={classes.spaceName}>Event Details</h2>
 
+              <div className={classes.borderSmall}>
+                <h3 className={classes.spaceName}>Event Details</h3>
                 <FormGroup className={classes.textField}>
                   <FormLabel component="legend">Start Time</FormLabel>
                   <DateTimePicker disableClock={true}  utcOffset={0} name="startDate" onChange={this.onDateChange} value={this.state.startDateForm}/>
@@ -451,28 +510,60 @@ class Venue extends Component {
                     <MenuItem value={720}>12:00 hours</MenuItem>
                   </Select>
                 </FormGroup>
-
+                </div>
                 <br/>
 
-              </div>
+                  <div className={`align-center ${classes.borderSmall}`}>
+                  <h3 className={classes.spaceName}>Spaces</h3>
 
-              {spaces ? (
-              <div className="align-center">
-                <h2 className={classes.spaceName}>Spaces</h2>
-                <CheckboxList startDate={this.state.startDate} duration={this.state.duration} checked={this.state.checked} data={spaces} setSelectedSpace={this.setSelectedSpace} checkSelectedSpace={this.checkSelectedSpace}/>
-                <Button disabled={this.state.checked.length == 0} variant="contained" color="primary" aria-label="Request to Book" className={classes.button} onClick={this.requestBooking}>
-                  <CheckIcon className={classes.extendedIcon} />
-                  Request to Book
-                </Button>
-              </div>
-              ): <h3 style={{textAlign: 'center'}}>Select a date to start planning your event.</h3> }
-              </div>
 
+                    <UserContext.Consumer>
+                      {context => (context.state.is_venue_coordinator ? (
+                        <ListItem button onClick={() => this.setState({openAddSpaces: true})}>
+                          <ListItemIcon>
+                            <AddIcon />
+                          </ListItemIcon>
+                          <ListItemText primary="Add Space" />
+                        </ListItem>) : null)}
+                    </UserContext.Consumer>
+
+                    {spaces ? (
+                        <div>
+                          <CheckboxList onSpaceDelete={this.onSpaceDelete} startDate={this.state.startDate} duration={this.state.duration} checked={this.state.checked} data={spaces} setSelectedSpace={this.setSelectedSpace} checkSelectedSpace={this.checkSelectedSpace}/>
+                          <Button disabled={this.state.checked.length == 0} variant="contained" color="primary" aria-label="Request to Book" className={classes.button} onClick={this.requestBooking}>
+                            <CheckIcon className={classes.extendedIcon} />
+                            Request to Book
+                          </Button>
+                        </div>
+
+                      ): null }
+                  </div>
+
+                </div>
                 )
+              }
 
+                <UserContext.Consumer>
+                  {context => (context.state.is_venue_coordinator ? (
+                    <div className={classes.borderSmall}>
+                      <Link to={"/venues/" + this.props.match.params.id + "/events/"}>
+                        <ListItem button>
+                          <ListItemIcon>
+                            <CalendarIcon />
+                          </ListItemIcon>
+                          <ListItemText primary="Event Calendar" />
+                        </ListItem>
+                      </Link>
 
-            }
+                      <ListItem button onClick={this.onVenueDelete}>
+                        <ListItemIcon>
+                          <DeleteIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Remove Venue" />
+                      </ListItem>
 
+                    </div>) : null)}
+                </UserContext.Consumer>
 
             </div>
 	    		</div>
@@ -480,6 +571,7 @@ class Venue extends Component {
     	}
 
     	{this.renderModalIframe()}
+      {this.renderAddSpaceModal()}
 
     	</div>
     );

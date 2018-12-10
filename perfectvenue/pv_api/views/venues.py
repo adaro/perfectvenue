@@ -7,6 +7,7 @@ from django.core import serializers
 from rest_framework.authtoken.models import Token
 from perfectvenue.forms import VenueCoordinatorSignUpForm
 from perfectvenue import settings
+import json
 from ..models import User, Venue
 from ..forms import VenueForm
 
@@ -41,6 +42,10 @@ class VenueView(View):
         venue_saved = venue_form.save()
         return redirect("{}{}{}".format("/api/venues/", venue_saved.id, "/created"))
 
+    def delete(self, request, venue_id):
+        venue = Venue.objects.get(id=venue_id)
+        venue.delete()
+        return HttpResponse(json.dumps({"success": True}), content_type="application/json")
 
 class CreatedVenueView(View):
     def get(self, request, venue_id=None):

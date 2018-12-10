@@ -14,6 +14,7 @@ import CheckIcon from '@material-ui/icons/Check';
 import CancelIcon from '@material-ui/icons/Cancel';
 import FilterIcon from '@material-ui/icons/FilterList';
 import { NotificationContext } from '../Components/Header'
+import { UserContext } from '../Components/Header'
 
 const API = PerfectvenueGlobals.defaultProps.PROD;
 
@@ -216,35 +217,38 @@ class Event extends Component {
 		      			<div>End: <small>{moment(this.state.selectedEvent.end_date).utc().format('YYYY/MM/DD hh:mm a').toString()}</small></div>
 		      		</div>
 
-		      		<div className={classes.venueCoordNotes}>
-		      			<TextField
-								  placeholder="My notes"
-								  multiline={true}
-								  rows={5}
-								  rowsMax={10}
-								/>
-		      		</div>
+		      		<UserContext.Consumer>
+		      			{user => (
+								user.state.is_venue_coordinator ?
+			      		<div className="flex">
+	      					<NotificationContext.Consumer>
+	        					{context => (
+	        					<div>
+						      		<div className={classes.venueCoordNotes}>
+						      			<TextField
+												  placeholder="My notes"
+												  multiline={true}
+												  rows={5}
+												  rowsMax={10}
+												/>
+						      		</div>
 
-		      		<div className="flex">
-      					<NotificationContext.Consumer>
-        					{context => (
-        						<div>
-						      <Button variant="contained" color="primary" aria-label="Approve" className={classes.button} onClick={event => this.updateStatus(event, 'AP', context)}>
-						        <CheckIcon className={classes.extendedIcon} />
-						        Approve
-						      </Button>
+								      <Button variant="contained" color="primary" aria-label="Approve" className={classes.button} onClick={event => this.updateStatus(event, 'AP', context)}>
+								        <CheckIcon className={classes.extendedIcon} />
+								        Approve
+								      </Button>
 
-						      <Button variant="contained" color="secondary" aria-label="Decline" className={classes.button} onClick={event => this.updateStatus(event, 'DC', context)}>
-						        <CancelIcon className={classes.extendedIcon} />
-						        Decline
-						      </Button>
-						      </div>
-					      )}
+								      <Button variant="contained" color="secondary" aria-label="Decline" className={classes.button} onClick={event => this.updateStatus(event, 'DC', context)}>
+								        <CancelIcon className={classes.extendedIcon} />
+								        Decline
+								      </Button>
+							      </div>
+						      )}
+								</NotificationContext.Consumer>
+							</div> : null
 
-							</NotificationContext.Consumer>
-
-
-							</div>
+						)}
+						</UserContext.Consumer>
 
 	      		</div> : <h3>Select Event to see it's details</h3>
 	      	}
