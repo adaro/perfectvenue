@@ -386,10 +386,10 @@ class Venue extends Component {
 
   onVenueDelete = () => {
     const self = this;
-    var url = '/api/venues/' + this.state.venueId + '/delete/'
-    const deleteVenuePromise = RestClient('DELETE', url)
     var confirmDelete = window.confirm("Are you sure you want to remove Venue?");
     if (confirmDelete) {
+      var url = '/api/venues/' + this.state.venueId + '/delete/'
+      const deleteVenuePromise = RestClient('DELETE', url)
       deleteVenuePromise.then(function(resp) {
         self.props.history.push('/')
       })
@@ -398,7 +398,6 @@ class Venue extends Component {
 
   onSpaceDelete = (event, spaceId, venueId) => {
     event.stopPropagation()
-    console.log(spaceId)
     const self = this;
     var confirmDelete = window.confirm("Are you sure you want to remove space?");
     if (confirmDelete) {

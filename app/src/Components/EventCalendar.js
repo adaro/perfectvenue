@@ -29,8 +29,8 @@ class EventCalendar extends Component {
         // defaultDate={this.props.defaultDate}
 				eventPropGetter={event => {
 						if (this.props.selected && this.props.selected.id === event.id) {
-							const backgroundColor = "#8247ff";
-							return { style: { backgroundColor } }
+							// const backgroundColor = "#8247ff";
+							return { style: { opacity: .7 } }
 						}
 
 						if (event.status === 'AP') {

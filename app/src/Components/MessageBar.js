@@ -31,7 +31,7 @@ class MessageBar extends React.Component {
       return;
     }
 
-    this.setState({ open: false });
+    this.setState({ open: false }, function(){ this.props.closeMessageBar() });
   };
 
   render() {

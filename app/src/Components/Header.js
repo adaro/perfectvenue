@@ -312,7 +312,7 @@ class MenuAppBar extends React.Component {
             </Toolbar>
           </AppBar>
 
-          <MessageBar message={this.state.message} open={this.state.openMessage}/>
+          <MessageBar closeMessageBar={this.closeMessageBar} message={this.state.message} open={this.state.openMessage}/>
 
           <UserContext.Provider
                 value={{

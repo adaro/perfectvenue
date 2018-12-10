@@ -120,31 +120,24 @@ class Event extends Component {
 		var self = this;
 		const putEventStatusPromise = RestClient('PUT', '/api/events/' + this.state.selectedEvent.id + "/",  {"status": status})
 		putEventStatusPromise.then(function(resp) {
-			self.getEvent()
 
 			if (context) {
 				context.getNotifications()
 			}
-
-			if (message) {
-
-					var longStatus = status
+			if (message && status !== event.status) {
+					self.getEvents()
 					switch(status) {
 						case "PN":
-							longStatus = 'PENDING'
-							message.showMessageBar("Updated to " + longStatus)
+							message.showMessageBar("Updated to " +  'PENDING')
 							return
 						case "AP":
-							longStatus = 'APPROVED'
-							message.showMessageBar("Updated to " + longStatus)
+							message.showMessageBar("Updated to " + 'APPROVED')
 							return
 						case "DC":
-							longStatus = 'DECLINED'
-							message.showMessageBar("Updated to " + longStatus)
+							message.showMessageBar("Updated to " + 'DECLINED')
 							return
 						case "CN":
-							longStatus = 'CANCELLED'
-							message.showMessageBar("Updated to " + longStatus)
+							message.showMessageBar("Updated to " + 'CANCELLED')
 							return
 					}
 			}
@@ -308,12 +301,12 @@ class Event extends Component {
 							                />
 
 
-										      <Button variant="contained" color="primary" aria-label="Approve" className={classes.button} onClick={event => this.updateStatus(event, 'AP', context, message)}>
+										      <Button variant="contained" color="primary" aria-label="Approve" className={classes.button} onClick={(event) => this.updateStatus(event, 'AP', context, message)}>
 										        <CheckIcon className={classes.extendedIcon} />
 										        Approve
 										      </Button>
 
-										      <Button variant="contained" color="secondary" aria-label="Decline" className={classes.button} onClick={event => this.updateStatus(event, 'DC', context, message)}>
+										      <Button variant="contained" color="secondary" aria-label="Decline" className={classes.button} onClick={(event) => this.updateStatus(event, 'DC', context, message)}>
 										        <CancelIcon className={classes.extendedIcon} />
 										        Decline
 										      </Button>
@@ -332,7 +325,7 @@ class Event extends Component {
 							<div>
 		    					<NotificationContext.Consumer>
 				      			{context => (
-								      <Button variant="contained" color="error" style={{backgroundColor: '#e91e63', color: 'white'}} aria-label="Cancel Event" className={classes.button} onClick={event => this.updateStatus(event, 'CN', context, message)}>
+								      <Button variant="contained" color="error" style={{backgroundColor: '#e91e63', color: 'white'}} aria-label="Cancel Event" className={classes.button} onClick={(event) => this.updateStatus(event, 'CN', context, message)}>
 								        <CancelIcon className={classes.extendedIcon} />
 								        Cancel
 								      </Button>
