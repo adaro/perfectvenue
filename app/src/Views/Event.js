@@ -125,7 +125,6 @@ class Event extends Component {
 				context.getNotifications()
 			}
 			if (message && status !== event.status) {
-					self.getEvents()
 					switch(status) {
 						case "PN":
 							message.showMessageBar("Updated to " +  'PENDING')
@@ -142,6 +141,8 @@ class Event extends Component {
 					}
 			}
 		})
+
+		self.getEvent()
 	}
 
 	filterEvents = (spaceName) => {
