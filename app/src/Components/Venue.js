@@ -125,7 +125,7 @@ const styles = theme => ({
   },
   bookingSuccess: {
     textAlign: 'center',
-    marginTop: '50%',
+    marginTop: '10%',
     margin: '0 auto',
   },
   bookingSuccessMessage: {
@@ -162,6 +162,7 @@ class Venue extends Component {
 		spaces: [],
     images: [],
     showStatus: false, // REMOVE - ONLY FOR DEMO PURPOSE
+    eventId: null,
     selectedSpace: null,
     selectedIndex: 0,
     checked: [],
@@ -207,7 +208,6 @@ class Venue extends Component {
         obj: value
       })
     })
-    console.log(arr, 54545)
     self.setState({
       spaces: arr.sort()
     })
@@ -284,7 +284,6 @@ class Venue extends Component {
   handleSubmit = (event) => {
     const self = this;
     event.preventDefault()
-    console.log(this.state.checked)
     const url = '/api/events/create/'
     const data = new FormData(event.target);
     var object = {};
@@ -295,7 +294,7 @@ class Venue extends Component {
     object['startDate'] = self.state.startDate
     const postFormPromise = RestClient('POST', url, object)
     postFormPromise.then(function(resp) {
-      self.setState({showStatus: true, open: false})
+      self.setState({showStatus: true, open: false, eventId: resp.id})
 
     })
 
@@ -348,7 +347,6 @@ class Venue extends Component {
 
   setSelectedSpace = (space, index, status) => {
     const self = this;
-    console.log(index)
     this.setState({selectedSpace: space, selectedIndex: index}, function(resp) {
 
     })
@@ -457,7 +455,7 @@ class Venue extends Component {
                     <h3><CheckIcon className={classes.extendedIconSuccess} /> Thank you for your reservation.</h3>
                     <div className={classes.bookingSuccessMessage}>Your booking is currently pending review. One of our venue coordinators will reach out soon.</div>
                     <Button variant="contained" color="primary" aria-label="Book another event" className={classes.button} onClick={() => {this.setState({showStatus: false})}} >Book another event</Button>
-                    <Button variant="outline" color="secondary" aria-label="Book another event" className={classes.button} onClick={() => {this.setState({showStatus: false})}} >Book another event</Button>
+                    <Button variant="contained" color="secondary" aria-label="View Event Calendar" className={`margin-20 ${classes.button}`} onClick={() => {this.props.history.push('/venues/' + this.state.venueId + '/events/' + this.state.eventId)}} >View Event Calendar</Button>
                   </div>
                 ) : (
 
