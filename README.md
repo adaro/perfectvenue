@@ -4,9 +4,6 @@ This is the API layer and frontend web application. The API is a django project
 held within the `perfectvenue` folder. The frontend is built in React and is 
 held within the `app` folder.
 
-**URIs**  
-API Server: http://pv-env.z7uy3c3xvn.us-west-2.elasticbeanstalk.com
-
 **API Development**
 
 In order to run the API on your local computer. You'll need to clone the source 
@@ -15,8 +12,8 @@ install all dependecies, add your `settings.py` file, create your MySQL database
 and finally run the django server. 
 
 Run the following in a Terminal:
-- `git clone https://gitlab.com/glyif/pv_availability.git`
-- `cd pv_availability/`
+- `git clone https://github.com/adaro/perfectvenue.git`
+- `cd perfectvenue/`
 - `virtualenv venv`
 - `source venv/bin/activate`
 - `pip install -r perfectvenue/requirements.txt`
@@ -25,8 +22,7 @@ Create your MySQL database:
 `mysql -p`
 `CREATE DATABASE perfectvenuedb;`
 
-Add your username/password to the `settings.py` file under `DATABASES` lines 129 and 130. (FYI, these lines are subject to change as we add to `settings.py`)
-Now your ready to Copy https://drive.google.com/open?id=1SbPs2zi1rwAMlOna8YbHIjQTdGCBcjpa into `perfectvenue/perfectvenue/`
+Create settings.py file and add your username/password to the `settings.py` file under `DATABASES` lines 129 and 130. (FYI, these lines are subject to change as we add to `settings.py`)
 (**WARNING:** `settings.py` should be kept in a secure location. NEVER check into Git) 
 
 Now back in the terminal, migrate the database and create your Admin user and run the server:
@@ -44,8 +40,8 @@ Go here to install: https://www.npmjs.com/get-npm. After you've install you'll n
 run the server. 
 
 Run the following in a Terminal:
-- `git clone https://gitlab.com/glyif/pv_availability.git`
-- `cd pv_availability/app/`
+- `git clone https://github.com/adaro/perfectvenue.git`
+- `cd perfectvenue/app/`
 - `npm install`
 - `npm start`
 
